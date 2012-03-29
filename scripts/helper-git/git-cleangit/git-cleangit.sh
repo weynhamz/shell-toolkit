@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
+#
 
 git reflog expire --expire=now --all
 
