@@ -30,6 +30,11 @@ libpath=`dirname $0`'/libs'
 #------------------------------------------------------------------------------
 # Flags and usage define section
 #------------------------------------------------------------------------------
+FLAGS_TEXT=`cat << EOF
+
+Options:
+EOF`
+
 FLAGS_HELP=`cat << 'EOF'
 
 Move files with a specific extension to a new directory and keeping the structure of the current directory.
