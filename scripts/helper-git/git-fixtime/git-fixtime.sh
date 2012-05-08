@@ -39,7 +39,9 @@ if [ -n "$1" ];then
     while [ -n "$1" ];do
         commit=$(git rev-parse $1)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
+        test_cmd=$test_cmd'('
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
+        test_cmd=$test_cmd')'
         first=0
         shift
     done
