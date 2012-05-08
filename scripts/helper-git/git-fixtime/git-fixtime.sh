@@ -33,10 +33,17 @@ test_cmd='cat'
 if [ -n "$1" ];then
     if [ -n "$isrange" ];then
         range=' '$1
-    else
-        commit=$1
-        test_cmd='test $GIT_COMMIT = "'$commit'"'
     fi
+    first=1
+    test_cmd='('
+    while [ -n "$1" ];do
+        commit=$1
+        [ $first -eq 0 ] && test_cmd=$test_cmd' || '
+        test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
+        first=0
+        shift
+    done
+    test_cmd=$test_cmd')'
 fi
 
 if [ -n "$date" ];then
