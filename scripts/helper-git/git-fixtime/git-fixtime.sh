@@ -3,7 +3,7 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :acd:frt opt
+while getopts :acd:firt opt
 do
     case $opt in
     'd')    date=$(LC_ALL=C date -R --date="$OPTARG")
@@ -19,6 +19,8 @@ do
             ;;
     't')    debug="TRUE"
             ;;
+    'i')    increase="TRUE"
+            ;;
     '?')    echo "Invalid Arg"
             exit 1
             ;;
@@ -31,6 +33,9 @@ range=' -- --all'
 test_cmd='cat'
 
 if [ -n "$1" ];then
+    if [ -n "$date" ];then
+        timestamp=$(date --date="$date" +%s)
+    fi
     if [ -n "$isrange" ];then
         set -- $(git rev-list $1)
     fi
@@ -42,6 +47,10 @@ if [ -n "$1" ];then
         test_cmd=$test_cmd'('
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$date" ];then
+            if [ -n "$increase" ];then
+                timestamp=$(($timestamp + $RANDOM%180 + 10))
+            fi
+            date=$(LC_ALL=C date -R --date="@$timestamp")
             if [ -n "$change_author_date" ];then
                 test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$date'"'
             fi
