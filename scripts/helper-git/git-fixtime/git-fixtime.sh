@@ -32,7 +32,7 @@ test_cmd='cat'
 
 if [ -n "$1" ];then
     if [ -n "$isrange" ];then
-        range=' '$1
+        set -- $(git rev-list $1)
     fi
     first=1
     test_cmd='('
