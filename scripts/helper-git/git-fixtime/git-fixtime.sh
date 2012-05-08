@@ -41,6 +41,14 @@ if [ -n "$1" ];then
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
         test_cmd=$test_cmd'('
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
+        if [ -n "$date" ];then
+            if [ -n "$change_author_date" ];then
+                author_date_cmd='&& export GIT_AUTHOR_DATE="'$date'"'
+            fi
+            if [ -n "$change_committer_date" ];then
+                committer_date_cmd='&& export GIT_COMMITTER_DATE="'$date'"'
+            fi
+        fi
         test_cmd=$test_cmd')'
         first=0
         shift
@@ -52,12 +60,6 @@ if [ -n "$date" ];then
     if [ -z "$commit" ] && [ ! -n "$isrange" ];then
         echo "commit or range not set"
         exit 1
-    fi
-    if [ -n "$change_author_date" ];then
-        author_date_cmd='&& export GIT_AUTHOR_DATE="'$date'"'
-    fi
-    if [ -n "$change_committer_date" ];then
-        committer_date_cmd='&& export GIT_COMMITTER_DATE="'$date'"'
     fi
 fi
 
