@@ -37,7 +37,7 @@ if [ -n "$1" ];then
     first=1
     test_cmd='('
     while [ -n "$1" ];do
-        commit=$1
+        commit=$(git rev-parse $1)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         first=0
