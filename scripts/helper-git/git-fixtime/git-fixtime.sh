@@ -43,10 +43,10 @@ if [ -n "$1" ];then
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$date" ];then
             if [ -n "$change_author_date" ];then
-                author_date_cmd='&& export GIT_AUTHOR_DATE="'$date'"'
+                test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$date'"'
             fi
             if [ -n "$change_committer_date" ];then
-                committer_date_cmd='&& export GIT_COMMITTER_DATE="'$date'"'
+                test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$date'"'
             fi
         fi
         test_cmd=$test_cmd')'
@@ -63,7 +63,7 @@ if [ -n "$date" ];then
     fi
 fi
 
-cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${author_date_cmd}' '${committer_date_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'${range}
+cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'${range}
 
 [ -n "$debug" ] && echo $cmd
 
