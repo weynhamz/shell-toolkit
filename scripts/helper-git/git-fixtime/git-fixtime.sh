@@ -40,11 +40,11 @@ if [ -n "$1" ];then
         set -- $(git rev-list --reverse $1)
     fi
     first=1
-    test_cmd='('
+    test_cmd='{ '
     while [ -n "$1" ];do
         commit=$(git rev-parse $1)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
-        test_cmd=$test_cmd'('
+        test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$date" ];then
             if [ -n "$increase" ];then
@@ -58,11 +58,11 @@ if [ -n "$1" ];then
                 test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$date'"'
             fi
         fi
-        test_cmd=$test_cmd')'
+        test_cmd=$test_cmd'; }'
         first=0
         shift
     done
-    test_cmd=$test_cmd')'
+    test_cmd=$test_cmd'; }'
 fi
 
 if [ -n "$date" ];then
