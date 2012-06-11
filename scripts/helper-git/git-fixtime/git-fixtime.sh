@@ -21,7 +21,7 @@ do
             ;;
     'i')    increase="TRUE"
             ;;
-    '?')    echo "Invalid Arg"
+      ?)    echo "Invalid Arg"
             exit 1
             ;;
     esac
