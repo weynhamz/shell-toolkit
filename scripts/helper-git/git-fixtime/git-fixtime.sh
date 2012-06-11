@@ -37,7 +37,7 @@ if [ -n "$1" ];then
         timestamp=$(date --date="$date" +%s)
     fi
     if [ -n "$isrange" ];then
-        set -- $(git rev-list $1)
+        set -- $(git rev-list --reverse $1)
     fi
     first=1
     test_cmd='('
