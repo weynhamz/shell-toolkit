@@ -76,6 +76,11 @@ if [ -n "$date" ];then
     fi
 fi
 
+if [ "$test_cmd" == "cat" ] && [ ! -n "$fix_committer_date_cmd" ];then
+    echo "no flag and no argument speified"
+    exit 1
+fi
+
 cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'${range}
 
 [ -n "$debug" ] && echo $cmd
