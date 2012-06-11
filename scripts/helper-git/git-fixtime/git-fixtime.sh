@@ -70,6 +70,10 @@ if [ -n "$date" ];then
         echo "commit or range not set"
         exit 1
     fi
+    if [ ! -n "$change_author_date" ] && [ ! -n "$change_committer_date" ];then
+        echo "one of -a or -c flag must be set"
+        exit 1
+    fi
 fi
 
 cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'${range}
