@@ -8,7 +8,7 @@ do
     case $opt in
     'p')    parent_commit=$OPTARG
             ;;
-    '?')    echo "invalid arg"
+      ?)    echo "invalid arg"
             exit 1
             ;;
     esac
