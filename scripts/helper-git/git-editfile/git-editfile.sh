@@ -3,12 +3,15 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :dmr opt
+while getopts :bdmr opt
 do
     case $opt in
+    'b')    backup="TRUE"
+            ;;
     'd')    dfedit="TRUE"
             ;;
-    'm')    modify="TRUE"
+    'm')    backup="TRUE"
+            dfedit="TRUE"
             ;;
     'r')    revert="TRUE"
             ;;
@@ -31,7 +34,7 @@ revert() {
 
 file=$1
 
-if [ -n "$modify" ]; then
+if [ -n "$backup" ]; then
     backup $file && git co $file
 elif [ -n "$revert" ]; then
     revert $file
