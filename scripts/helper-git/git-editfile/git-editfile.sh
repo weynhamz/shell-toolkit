@@ -25,12 +25,18 @@ shift $((OPTIND - 1))
 backup() {
     local file=$1
     [ ! -f $file ] && return 0
+    if [ -f $file.bak ] && ! $(cmp -s $file $file.bak); then
+        backup $file.bak
+    fi
     cp $file $file.bak
 }
 
 revert() {
     local file=$1
     mv $file.bak $file
+    if [ -f $file.bak.bak ]; then
+        revert $file.bak
+    fi
 }
 
 file=$1
