@@ -17,11 +17,21 @@ do
 done
 shift $((OPTIND - 1))
 
+backup() {
+    local file=$1
+    cp $file $file.bak
+}
+
+revert() {
+    local file=$1
+    mv $file.bak $file
+}
+
 file=$1
 
 if [ -n "$modify" ]; then
-    cp $file $file.bak && git co $file
+    backup $file && git co $file
     vimdiff $file $file.bak
 elif [ -n "$revert" ]; then
-    mv $file.bak $file
+    revert $file
 fi
