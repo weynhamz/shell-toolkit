@@ -10,7 +10,7 @@ do
             ;;
     'r')    revert="TRUE"
             ;;
-    '?')    echo "Invalid Arg"
+      ?)    echo "Invalid Arg"
             exit 1
             ;;
     esac
