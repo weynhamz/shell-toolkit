@@ -34,6 +34,11 @@ revert() {
 
 file=$1
 
+if ! $(git ls-files | grep -q $file); then
+    echo "$file is not in git repository"
+    exit 1
+fi
+
 if [ -n "$backup" ]; then
     if $(git ls-files -m | grep -q $file); then
         backup $file && git co $file
