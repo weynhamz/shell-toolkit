@@ -3,7 +3,7 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :bdfmr opt
+while getopts :bdfgmr opt
 do
     case $opt in
     'b')    backup="TRUE"
@@ -11,6 +11,10 @@ do
     'd')    dfedit="TRUE"
             ;;
     'f')    forced="TRUE"
+            ;;
+    'g')    giveup="TRUE"
+            backup="TRUE"
+            dfedit="TRUE"
             ;;
     'm')    backup="TRUE"
             dfedit="TRUE"
@@ -51,6 +55,9 @@ fi
 if [ -n "$backup" ]; then
     if $(git ls-files -m | grep -q $file) || [ -n "$forced" ]; then
         backup $file && git co $file
+    fi
+    if [ -n "$giveup" ]; then
+        backup $file && git co HEAD~ $file && git reset HEAD $file
     fi
 elif [ -n "$revert" ]; then
     if $(git ls-files -m | grep -q $file) && [ ! -n "$forced" ]; then
