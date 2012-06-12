@@ -35,9 +35,16 @@ revert() {
 file=$1
 
 if [ -n "$backup" ]; then
-    backup $file && git co $file
+    if $(git ls-files -m | grep -q $file); then
+        backup $file && git co $file
+    fi
 elif [ -n "$revert" ]; then
-    revert $file
+    if $(git ls-files -m | grep -q $file); then
+        echo "$file has been modified";
+        exit 1
+    else
+        revert $file
+    fi
 fi
 
 if [ -n "$dfedit" ] && [ -f $file.bak ]; then
