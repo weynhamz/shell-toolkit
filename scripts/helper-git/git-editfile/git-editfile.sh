@@ -24,6 +24,7 @@ shift $((OPTIND - 1))
 
 backup() {
     local file=$1
+    [ ! -f $file ] && return 0
     cp $file $file.bak
 }
 
