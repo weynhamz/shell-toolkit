@@ -3,12 +3,14 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :bdmr opt
+while getopts :bdfmr opt
 do
     case $opt in
     'b')    backup="TRUE"
             ;;
     'd')    dfedit="TRUE"
+            ;;
+    'f')    forced="TRUE"
             ;;
     'm')    backup="TRUE"
             dfedit="TRUE"
@@ -41,17 +43,17 @@ revert() {
 
 file=$1
 
-if ! $(git ls-files | grep -q $file); then
+if ! $(git ls-files | grep -q $file) && [ ! -n "$forced" ]; then
     echo "$file is not in git repository"
     exit 1
 fi
 
 if [ -n "$backup" ]; then
-    if $(git ls-files -m | grep -q $file); then
+    if $(git ls-files -m | grep -q $file) || [ -n "$forced" ]; then
         backup $file && git co $file
     fi
 elif [ -n "$revert" ]; then
-    if $(git ls-files -m | grep -q $file); then
+    if $(git ls-files -m | grep -q $file) && [ ! -n "$forced" ]; then
         echo "$file has been modified";
         exit 1
     else
