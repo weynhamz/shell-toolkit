@@ -129,6 +129,7 @@ mksingle() {
 		cat $LOGDIR/$j >> $j-combined
 		mv $LOGDIR/$j $BACKUPDIR/
 		mv $j-combined $LOGDIR/$j
+		chown root:log $LOGDIR/$j
 	done
 }
 
