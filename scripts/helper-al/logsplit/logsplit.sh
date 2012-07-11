@@ -48,23 +48,23 @@ mkdir -p $BACKUPDIR
 mkdir -p $BACKUPOLDDIR
 
 clean() {
-	mkdir $PROCESSDIR/mail
+	mkdir -p $PROCESSDIR/mail
 	for i in `ls -1 mail.log.*`;do
 		mv *${i#mail.log} $PROCESSDIR/mail
 	done
 
-	mkdir $PROCESSDIR/cron
+	mkdir -p $PROCESSDIR/cron
 	for i in `ls -1 crond.log.*`;do
 		mv *${i#crond.log} $PROCESSDIR/cron
 	done
 
-	mkdir $PROCESSDIR/left
+	mkdir -p $PROCESSDIR/left
 	mv *.log.* $PROCESSDIR/left
 
-	mkdir $PROCESSDIR/errors
+	mkdir -p $PROCESSDIR/errors
 	mv errors.log.* $PROCESSDIR/errors
 
-	mkdir $PROCESSDIR/messages
+	mkdir -p $PROCESSDIR/messages
 	mv messages.log.* $PROCESSDIR/messages
 }
 
