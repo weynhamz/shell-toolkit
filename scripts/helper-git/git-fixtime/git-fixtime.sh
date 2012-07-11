@@ -70,7 +70,7 @@ OPTIONS:
 
         -a Change author date to the given date.
         -c Change committer date to the given date.
-        -d RFC 2822 format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
+        -d Date format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -f Set commiter date same as author date.
         -r The given argument is a commit range. Example: a203382..b73215f
         -t Debug mode, output the command to be executed.
