@@ -125,7 +125,7 @@ if [ $SPLIT -eq 1 ];then
 		cd $LOGDIR
 		for j in ${LOGS[@]}
 		do
-			split $j
+			[ -f $j ] && split $j
 		done
 		clean
 	fi
@@ -138,7 +138,7 @@ if [ $COMBINE -eq 1 ];then
 		cd $OLDDIR
 		for j in ${LOGS[@]}
 		do
-			combine $j
+			[ -f $j ] && combine $j
 		done
 	fi
 fi
