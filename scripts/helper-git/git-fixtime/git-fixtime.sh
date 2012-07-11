@@ -122,6 +122,9 @@ if [ -n "$1" ];then
         if [ -n "$isrange" ];then
             set -- $(git rev-list --reverse $1)
         fi
+    else
+        echo "-d flag is required"
+        exit 1
     fi
     first=1
     test_cmd='{ '
