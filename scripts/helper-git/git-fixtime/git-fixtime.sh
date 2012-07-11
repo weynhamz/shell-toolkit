@@ -119,9 +119,9 @@ if [ -n "$1" ];then
         if [ -n "$increase" ];then
             timestamp=$(date --date="$date" +%s)
         fi
-    fi
-    if [ -n "$isrange" ];then
-        set -- $(git rev-list --reverse $1)
+        if [ -n "$isrange" ];then
+            set -- $(git rev-list --reverse $1)
+        fi
     fi
     first=1
     test_cmd='{ '
