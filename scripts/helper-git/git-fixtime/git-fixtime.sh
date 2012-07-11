@@ -116,7 +116,9 @@ test_cmd='cat'
 
 if [ -n "$1" ];then
     if [ -n "$date" ];then
-        timestamp=$(date --date="$date" +%s)
+        if [ -n "$increase" ];then
+            timestamp=$(date --date="$date" +%s)
+        fi
     fi
     if [ -n "$isrange" ];then
         set -- $(git rev-list --reverse $1)
@@ -131,8 +133,8 @@ if [ -n "$1" ];then
         if [ -n "$date" ];then
             if [ -n "$increase" ];then
                 timestamp=$(($timestamp + $RANDOM%180 + 10))
+                date=$(LC_ALL=C date -R --date="@$timestamp")
             fi
-            date=$(LC_ALL=C date -R --date="@$timestamp")
             if [ -n "$change_author_date" ];then
                 test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$date'"'
             fi
