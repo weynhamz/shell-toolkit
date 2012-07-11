@@ -23,11 +23,11 @@ done
 
 shift $((OPTIND - 1))
 
-#user.log
-#auth.log
 #dmesg.log
 #pacman.log
 LOGS=(
+	"user.log"
+	"auth.log"
 	"mail.log"
 	"crond.log"
 	"daemon.log"
@@ -48,6 +48,12 @@ mkdir -p $BACKUPDIR
 mkdir -p $BACKUPOLDDIR
 
 clean() {
+	mkdir -p $PROCESSDIR/auth
+	mv auth.log.*     $PROCESSDIR/auth
+
+	mkdir -p $PROCESSDIR/user
+	mv user.log.*     $PROCESSDIR/user
+
 	mkdir -p $PROCESSDIR/mail
 	for i in `ls -1 mail.log.*`;do
 		mv *${i#mail.log} $PROCESSDIR/mail
@@ -66,6 +72,8 @@ clean() {
 
 	mkdir -p $PROCESSDIR/left
 	mv *.log.* $PROCESSDIR/left
+
+	mv $PROCESSDIR/user/user.log.shutdown $PROCESSDIR/left
 }
 
 split(){
