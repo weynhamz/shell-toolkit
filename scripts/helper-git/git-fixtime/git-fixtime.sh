@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
@@ -49,6 +49,16 @@
 #
 #           git-fixtime.sh -a -f -d "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
 #
+#   * Read commit and date info from a file with each line in a 'commit:date'
+#     format.
+#
+#           git-fixtime.sh -a -f -s some_file
+#
+#       Example of some_file:
+#
+#           a203382:Mon, 07 Aug 2006 12:34:56 -0600
+#           b73215f:Mon, 07 Aug 2006 12:34:56 -0600
+#
 #   -t flag could be used to examing the command before an actural performing.
 #
 #   If bad things happened, `git reflog` could help to get the last ref back.
@@ -65,6 +75,7 @@ USAGE:
 
     git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i ] ] COMMIT1 COMMIT2 ...
     git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -t ] [ -h ] [ -f ] ( -a | -c ) -s SOURCE_FILE
 
 OPTIONS:
 
@@ -75,6 +86,7 @@ OPTIONS:
         -r The given argument is a commit range. Example: a203382..b73215f
         -t Debug mode, output the command to be executed.
         -i Generate the date by randomly increasing the given date. The increasing range is 3 minites.
+        -s Read commit and date info from a file with each line in a 'commit:date' format.
         -h Show help message.
 
     For more example, please read the source.
@@ -83,7 +95,7 @@ EOF
 exit 0
 }
 
-while getopts :acd:fhirt opt
+while getopts :acd:fhirs:t opt
 do
     case $opt in
     'd')    date=$(LC_ALL=C date -R --date="$OPTARG")
@@ -101,6 +113,9 @@ do
             ;;
     'i')    increase="TRUE"
             ;;
+    's')    source="TRUE"
+            source_file=$OPTARG
+            ;;
     'h')    showhelp
             ;;
       ?)    echo "Invalid Arg"
@@ -114,27 +129,33 @@ range=' -- --all'
 
 test_cmd='cat'
 
-if [ -n "$1" ];then
+if [ -n "$1" ] || [ ! -n "$source" ];then
+    if [ -n "$isrange" ];then
+        hashlist=$(git rev-list --reverse $1)
+    else
+        hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
+    fi
     if [ -n "$date" ];then
         if [ -n "$increase" ];then
             timestamp=$(date --date="$date" +%s)
         fi
-        if [ -n "$isrange" ];then
-            set -- $(git rev-list --reverse $1)
-        fi
-    else
+        hashlist=$(echo "$hashlist" | sed "s/$/:$date/g")
+    elif [ ! -n "$fix_committer_date_cmd" ];then
         echo "-d flag is required"
         exit 1
     fi
+fi
+
+if [ -n "$1" ] || [ -n "$source" ];then
     first=1
     test_cmd='{ '
-    while [ -n "$1" ];do
-        commit=$(git rev-parse $1)
+    while IFS=: read -r commit date;do
+        commit=$(git rev-parse $commit)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$date" ];then
-            if [ -n "$increase" ];then
+            if [ ! -n "$source" ] && [ -n "$increase" ];then
                 timestamp=$(($timestamp + $RANDOM%180 + 10))
                 date=$(LC_ALL=C date -R --date="@$timestamp")
             fi
@@ -148,7 +169,7 @@ if [ -n "$1" ];then
         test_cmd=$test_cmd'; }'
         first=0
         shift
-    done
+    done < <([ -n "$source" ] && [ -f $source_file ] && cat $source_file || echo "$hashlist")
     test_cmd=$test_cmd'; }'
 fi
 
