@@ -58,14 +58,14 @@ clean() {
 		mv *${i#crond.log} $PROCESSDIR/cron
 	done
 
-	mkdir -p $PROCESSDIR/left
-	mv *.log.* $PROCESSDIR/left
-
 	mkdir -p $PROCESSDIR/errors
 	mv errors.log.* $PROCESSDIR/errors
 
 	mkdir -p $PROCESSDIR/messages
 	mv messages.log.* $PROCESSDIR/messages
+
+	mkdir -p $PROCESSDIR/left
+	mv *.log.* $PROCESSDIR/left
 }
 
 split(){
