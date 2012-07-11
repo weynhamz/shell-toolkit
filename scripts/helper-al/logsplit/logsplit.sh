@@ -1,10 +1,13 @@
 #!/bin/bash
 
-while getopts ":cs" optname
+while getopts ":csm" optname
 do
 	case "$optname" in
 		"s")
 			SPLIT=1
+			;;
+		"m")
+			MERGE=1
 			;;
 		"c")
 			COMBINE=1
@@ -118,6 +121,17 @@ combine() {
 	fi
 }
 
+mksingle() {
+	cd $OLDDIR
+	for j in ${LOGS[@]}
+	do
+		combine $j
+		cat $LOGDIR/$j >> $j-combined
+		mv $LOGDIR/$j $BACKUPDIR/
+		mv $j-combined $LOGDIR/$j
+	done
+}
+
 if [ $SPLIT -eq 1 ];then
 	if [ -n "$1" ];then
 		split $1
@@ -141,4 +155,8 @@ if [ $COMBINE -eq 1 ];then
 			[ -f $j ] && combine $j
 		done
 	fi
+fi
+
+if [ $MERGE -eq 1 ];then
+	mksingle
 fi
