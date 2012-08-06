@@ -29,26 +29,26 @@
 #
 #   * Change the author date of the given commit[s] to a given date.
 #
-#           git-fixtime.sh -a -d "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#           git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * Change the author date as well as committer date of the given commit[s]
 #     to a given date.
 #
-#           git-fixtime.sh -a -c -d "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#           git-fixtime.sh -a -c -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #       Equals to
 #
-#           git-fixtime.sh -f -a -d "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * The following will do nothing, it is nouse.
 #
-#           git-fixtime.sh -c -f -d "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#           git-fixtime.sh -c -f -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * Generate the date by randomly increasing the given date. The increasing
 #     range is 3 minitus, this could be changed by -m flag.
 #
-#           git-fixtime.sh -a -f -d "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
-#           git-fixtime.sh -a -f -d "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
+#           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
+#           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
 #
 #   * Read commit and date info from a file with each line in a 'commit:date'
 #     format.
@@ -60,7 +60,7 @@
 #           a203382:Mon, 07 Aug 2006 12:34:56 -0600
 #           b73215f:Mon, 07 Aug 2006 12:34:56 -0600
 #
-#   -t flag could be used to examing the command before an actural performing.
+#   -d flag could be used to examing the command before an actural performing.
 #
 #   If bad things happened, `git reflog` could help to get the last ref back.
 #
@@ -76,9 +76,9 @@ A script designed to simplify the procedure to alter git commit time.
 
 USAGE:
 
-    git-fixtime.sh [ -t ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -t ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
-    git-fixtime.sh [ -t ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -d ] [ -f ] ( -a | -c ) -s SOURCE_FILE
     git-fixtime.sh [ -h ]
 
 OPTIONS:
@@ -87,10 +87,10 @@ OPTIONS:
 
         -a Change author date to the given date.
         -c Change committer date to the given date.
-        -d Date format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
+        -t Date format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -f Set commiter date same as author date.
         -r The given argument is a commit range. Example: a203382..b73215f
-        -t Debug mode, output the command to be executed.
+        -d Debug mode, output the command to be executed.
         -i Generate the date by randomly increasing the given date.
         -m Specify the increasing range of -i flag in mintes, default is 3 minites.
         -s Read commit and date info from a file with each line in a 'commit:date' format.
@@ -102,10 +102,10 @@ EOF
 exit 0
 }
 
-while getopts :acd:fhim:rs:t opt
+while getopts :acdfhim:rs:t: opt
 do
     case $opt in
-    'd')    date=$(LC_ALL=C date -R --date="$OPTARG")
+    't')    date=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && exit 1
             ;;
     'a')    change_author_date="TRUE"
@@ -116,7 +116,7 @@ do
             ;;
     'r')    isrange="TRUE"
             ;;
-    't')    debug="TRUE"
+    'd')    debug="TRUE"
             ;;
     'i')    increase="TRUE"
             ;;
