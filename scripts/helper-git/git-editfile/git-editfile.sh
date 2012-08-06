@@ -3,34 +3,40 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :bc:dfgmrs opt
+while [ $# -gt 0 ]
 do
-    case $opt in
-    'b')    backup="TRUE"
+    case $1 in
+    '-b')   backup="TRUE"
             ;;
-    'c')    commit="$OPTARG"
+    '-c')   commit="$2"
+            shift
             ;;
-    'd')    dfedit="TRUE"
+    '-d')   dfedit="TRUE"
             ;;
-    'f')    forced="TRUE"
+    '-f')   forced="TRUE"
             ;;
-    'g')    giveup="TRUE"
+    '-g')   giveup="TRUE"
             backup="TRUE"
             dfedit="TRUE"
             ;;
-    'm')    backup="TRUE"
+    '-m')   backup="TRUE"
             dfedit="TRUE"
             ;;
-    'r')    revert="TRUE"
+    '-r')   revert="TRUE"
             ;;
-    's')    squash="TRUE"
+    '-s')   squash="TRUE"
             ;;
-      ?)    echo "Invalid Arg"
+      -*)   echo "Invalid Arg"
             exit 1
             ;;
+       *)   [ -z "$file" ] && file="$1" || {
+                echo "File has been specified: $file, $1 is not valid."
+                exit 1
+            }
+            ;;
     esac
+    shift
 done
-shift $((OPTIND - 1))
 
 backup() {
     local file=$1
@@ -48,8 +54,6 @@ revert() {
         revert $file.bak
     fi
 }
-
-file=$1
 
 if ! $(git ls-files | grep -q $file) && [ ! -n "$forced" ]; then
     echo "$file is not in git repository"
