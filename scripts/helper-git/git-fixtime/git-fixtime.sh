@@ -45,9 +45,10 @@
 #           git-fixtime.sh -c -f -d "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * Generate the date by randomly increasing the given date. The increasing
-#     range is 3 minitus.
+#     range is 3 minitus, this could be changed by -m flag.
 #
 #           git-fixtime.sh -a -f -d "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
+#           git-fixtime.sh -a -f -d "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
 #
 #   * Read commit and date info from a file with each line in a 'commit:date'
 #     format.
@@ -73,8 +74,8 @@ showhelp() {
 
 USAGE:
 
-    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
     git-fixtime.sh [ -t ] [ -h ] [ -f ] ( -a | -c ) -s SOURCE_FILE
 
 OPTIONS:
@@ -85,7 +86,8 @@ OPTIONS:
         -f Set commiter date same as author date.
         -r The given argument is a commit range. Example: a203382..b73215f
         -t Debug mode, output the command to be executed.
-        -i Generate the date by randomly increasing the given date. The increasing range is 3 minites.
+        -i Generate the date by randomly increasing the given date.
+        -m Specify the increasing range of -i flag in mintes, default is 3 minites.
         -s Read commit and date info from a file with each line in a 'commit:date' format.
         -h Show help message.
 
@@ -95,7 +97,7 @@ EOF
 exit 0
 }
 
-while getopts :acd:fhirs:t opt
+while getopts :acd:fhim:rs:t opt
 do
     case $opt in
     'd')    date=$(LC_ALL=C date -R --date="$OPTARG")
@@ -112,6 +114,12 @@ do
     't')    debug="TRUE"
             ;;
     'i')    increase="TRUE"
+            ;;
+    'm')    [ $OPTARG -gt 0 ] || {
+                echo "Invalide random range arg"
+                exit 1
+            }
+            random_minite=$OPTARG
             ;;
     's')    source="TRUE"
             source_file=$OPTARG
@@ -156,7 +164,8 @@ if [ -n "$1" ] || [ -n "$source" ];then
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$date" ];then
             if [ ! -n "$source" ] && [ -n "$increase" ];then
-                timestamp=$(($timestamp + $RANDOM%180 + 10))
+                [ ! -n "$random_minite" ] && random_minite=3
+                timestamp=$(($timestamp + $RANDOM%(60 * $random_minite) + 10))
                 date=$(LC_ALL=C date -R --date="@$timestamp")
             fi
             if [ -n "$change_author_date" ];then
