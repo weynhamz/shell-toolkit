@@ -3,7 +3,7 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :bdfgmr opt
+while getopts :bdfgmrs opt
 do
     case $opt in
     'b')    backup="TRUE"
@@ -20,6 +20,8 @@ do
             dfedit="TRUE"
             ;;
     'r')    revert="TRUE"
+            ;;
+    's')    squash="TRUE"
             ;;
       ?)    echo "Invalid Arg"
             exit 1
@@ -76,4 +78,9 @@ if [ -n "$dfedit" ] && [ -f $file.bak ]; then
     fi
     $editor -d $file $file.bak
     exit 0
+fi
+
+if [ -n "$squash" ]; then
+    git add $file
+    git commit -m "squash"
 fi
