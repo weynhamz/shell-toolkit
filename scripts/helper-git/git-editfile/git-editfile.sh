@@ -3,10 +3,12 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :bdfgmrs opt
+while getopts :bc:dfgmrs opt
 do
     case $opt in
     'b')    backup="TRUE"
+            ;;
+    'c')    commit="$OPTARG"
             ;;
     'd')    dfedit="TRUE"
             ;;
@@ -81,6 +83,10 @@ if [ -n "$dfedit" ] && [ -f $file.bak ]; then
 fi
 
 if [ -n "$squash" ]; then
+    commit="squash"
+fi
+
+if [ -n "$commit" ]; then
     git add $file
-    git commit -m "squash"
+    git commit -m "$commit"
 fi
