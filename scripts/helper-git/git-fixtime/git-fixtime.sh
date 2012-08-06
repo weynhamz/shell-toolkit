@@ -62,6 +62,15 @@
 #
 #   -d flag could be used to examing the command before an actural performing.
 #
+#   This script is just a wrapper to `git-filter-branch` whcih by default
+#   filtering all branches, in order to reduce the processing time, a specific
+#   branch which contains the target commit[s] could be specified by flag -b.
+#
+#   For example, if commit 'a203382' is in branch 'test', then the following
+#   command would be faster than the one without '-b' flag.
+#
+#       git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -b test a203382
+#
 #   If bad things happened, `git reflog` could help to get the last ref back.
 #
 #   Performing on a temporary branch is a good choice. If everything goes fine,
@@ -76,9 +85,9 @@ A script designed to simplify the procedure to alter git commit time.
 
 USAGE:
 
-    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
-    git-fixtime.sh [ -d ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] ( -a | -c ) -s SOURCE_FILE
     git-fixtime.sh [ -h ]
 
 OPTIONS:
@@ -86,6 +95,7 @@ OPTIONS:
     Options in '[]' is optional, '( -a | -c )' means either '-a' or '-c' has to be specified.
 
         -a Change author date to the given date.
+        -b The branch to be filtered with.
         -c Change committer date to the given date.
         -t Time format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -f Set commiter date same as author date.
@@ -102,13 +112,15 @@ EOF
 exit 0
 }
 
-while getopts :acdfhim:rs:t: opt
+while getopts :ab:cdfhim:rs:t: opt
 do
     case $opt in
     't')    time=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && exit 1
             ;;
     'a')    change_author_date="TRUE"
+            ;;
+    'b')    branch="$OPTARG"
             ;;
     'c')    change_committer_date="TRUE"
             ;;
@@ -138,7 +150,11 @@ do
 done
 shift $((OPTIND - 1))
 
-range=' -- --all'
+if [ -n "$branch" ]; then
+    range="$branch"
+else
+    range='-- --all'
+fi
 
 test_cmd='cat'
 
@@ -203,7 +219,7 @@ if [ "$test_cmd" == "cat" ] && [ ! -n "$fix_committer_date_cmd" ];then
     exit 1
 fi
 
-cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'${range}
+cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'' '${range}
 
 [ -n "$debug" ] && echo $cmd
 
