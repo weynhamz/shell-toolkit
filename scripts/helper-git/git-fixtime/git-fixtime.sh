@@ -72,13 +72,18 @@
 showhelp() {
    cat << EOF
 
+A script designed to simplify the procedure to alter git commit time.
+
 USAGE:
 
-    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -t ] [ -h ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
-    git-fixtime.sh [ -t ] [ -h ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -t ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -t ] [ -f ] [ ( -a | -c ) -d DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -t ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -h ]
 
 OPTIONS:
+
+    Options in '[]' is optional, '( -a | -c )' means either '-a' or '-c' has to be specified.
 
         -a Change author date to the given date.
         -c Change committer date to the given date.
