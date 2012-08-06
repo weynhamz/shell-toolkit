@@ -69,6 +69,11 @@ elif [ -n "$revert" ]; then
 fi
 
 if [ -n "$dfedit" ] && [ -f $file.bak ]; then
-    vim -d $file $file.bak
+    if [ -n "$VIMBIN" ]; then
+        editor=$VIMBIN
+    else
+        editor=vim
+    fi
+    $editor -d $file $file.bak
     exit 0
 fi
