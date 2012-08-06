@@ -6,7 +6,7 @@
 while getopts :p: opt
 do
     case $opt in
-    'p')    parent_commit=$OPTARG
+    'p')    parent_commit=$(git rev-parse $OPTARG)
             ;;
       ?)    echo "invalid arg"
             exit 1
@@ -15,4 +15,6 @@ do
 done
 shift $((OPTIND - 1))
 
-git filter-branch -f --parent-filter 'test $GIT_COMMIT = '$1' && echo "-p '$parent_commit'" || cat' -- --all
+target_commit=$(git rev-parse $1)
+
+git filter-branch -f --parent-filter 'test $GIT_COMMIT = '$target_commit' && echo "-p '$parent_commit'" || cat' -- --all
