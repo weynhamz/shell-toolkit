@@ -44,13 +44,13 @@
 #
 #           git-fixtime.sh -c -f -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
-#   * Generate the date by randomly increasing the given date. The increasing
+#   * Generate the time by randomly increasing the given time. The increasing
 #     range is 3 minitus, this could be changed by -m flag.
 #
 #           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
 #           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
 #
-#   * Read commit and date info from a file with each line in a 'commit:date'
+#   * Read commit and time info from a file with each line in a 'commit:time'
 #     format.
 #
 #           git-fixtime.sh -a -f -s some_file
@@ -76,8 +76,8 @@ A script designed to simplify the procedure to alter git commit time.
 
 USAGE:
 
-    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t DATE [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t DATE [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -d ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
     git-fixtime.sh [ -d ] [ -f ] ( -a | -c ) -s SOURCE_FILE
     git-fixtime.sh [ -h ]
 
@@ -87,11 +87,11 @@ OPTIONS:
 
         -a Change author date to the given date.
         -c Change committer date to the given date.
-        -t Date format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
+        -t Time format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -f Set commiter date same as author date.
         -r The given argument is a commit range. Example: a203382..b73215f
         -d Debug mode, output the command to be executed.
-        -i Generate the date by randomly increasing the given date.
+        -i Generate the time by randomly increasing the given time.
         -m Specify the increasing range of -i flag in mintes, default is 3 minites.
         -s Read commit and date info from a file with each line in a 'commit:date' format.
         -h Show help message.
@@ -105,7 +105,7 @@ exit 0
 while getopts :acdfhim:rs:t: opt
 do
     case $opt in
-    't')    date=$(LC_ALL=C date -R --date="$OPTARG")
+    't')    time=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && exit 1
             ;;
     'a')    change_author_date="TRUE"
@@ -148,11 +148,11 @@ if [ -n "$1" ] || [ ! -n "$source" ];then
     else
         hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
     fi
-    if [ -n "$date" ];then
+    if [ -n "$time" ];then
         if [ -n "$increase" ];then
-            timestamp=$(date --date="$date" +%s)
+            timestamp=$(date --date="$time" +%s)
         fi
-        hashlist=$(echo "$hashlist" | sed "s/$/:$date/g")
+        hashlist=$(echo "$hashlist" | sed "s/$/:$time/g")
     elif [ ! -n "$fix_committer_date_cmd" ];then
         echo "-d flag is required"
         exit 1
@@ -162,22 +162,22 @@ fi
 if [ -n "$1" ] || [ -n "$source" ];then
     first=1
     test_cmd='{ '
-    while IFS=: read -r commit date;do
+    while IFS=: read -r commit time;do
         commit=$(git rev-parse $commit)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
-        if [ -n "$date" ];then
+        if [ -n "$time" ];then
             if [ ! -n "$source" ] && [ -n "$increase" ];then
                 [ ! -n "$random_minite" ] && random_minite=3
                 timestamp=$(($timestamp + $RANDOM%(60 * $random_minite) + 10))
-                date=$(LC_ALL=C date -R --date="@$timestamp")
+                time=$(LC_ALL=C date -R --date="@$timestamp")
             fi
             if [ -n "$change_author_date" ];then
-                test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$date'"'
+                test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$time'"'
             fi
             if [ -n "$change_committer_date" ];then
-                test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$date'"'
+                test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$time'"'
             fi
         fi
         test_cmd=$test_cmd'; }'
@@ -187,7 +187,7 @@ if [ -n "$1" ] || [ -n "$source" ];then
     test_cmd=$test_cmd'; }'
 fi
 
-if [ -n "$date" ];then
+if [ -n "$time" ];then
     if [ -z "$commit" ] && [ ! -n "$isrange" ];then
         echo "commit or range not set"
         exit 1
