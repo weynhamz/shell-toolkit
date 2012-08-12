@@ -60,8 +60,8 @@ DEFINE_string 'conv' '' 'convert codepage of the filenames after extraction' 'c'
 DEFINE_boolean 'ignore' false 'ignore the case of extension' 'i'
 DEFINE_boolean 'tolower' false 'change extension to lowwer case' 't'
 DEFINE_boolean 'extract' false 'extract archive files, requre p7zip for zip support, rar for rar support' 'x'
-DEFINE_boolean 'movefile' false 'move matched files to another directory' 'm'
-DEFINE_boolean 'pruneempty' true 'prune empty directories in the source directory' 'p'
+DEFINE_boolean 'move-file' false 'move matched files to another directory' 'm'
+DEFINE_boolean 'prune-empty' true 'prune empty directories in the source directory' 'p'
 
 #------------------------------------------------------------------------------
 # Process the flags
@@ -141,7 +141,7 @@ for f in `eval $__cmd`;do
         # Move specfic type of files to a new directory basing on their
         # extensions
         #----------------------------------------------------------------------
-        if [ ${FLAGS_movefile} -eq ${FLAGS_TRUE} ];then
+        if [ ${FLAGS_move_file} -eq ${FLAGS_TRUE} ];then
             dest_movefile=$__src.$__ext
             [ -n "${FLAGS_dest}" ] && dest_movefile=${FLAGS_dest}
             dest=${dest_movefile%/}${dir#$__src}
@@ -160,7 +160,7 @@ for f in `eval $__cmd`;do
     #--------------------------------------------------------------------------
     # Prune empty directory in which the file belongs
     #--------------------------------------------------------------------------
-    [ ${FLAGS_pruneempty} -eq ${FLAGS_TRUE} ] && \
+    [ ${FLAGS_prune_empty} -eq ${FLAGS_TRUE} ] && \
     [ `find $dir -mindepth 1 -maxdepth 1 -type f | wc -l` = "0" ] && \
     rmdir -v $dir
 done
