@@ -21,10 +21,28 @@
 #
 #==============================================================================
 
+#
+# Get current directory
+#
+# From: http://stackoverflow.com/questions/59895
+#
+_current_path() {
+    SOURCE="${BASH_SOURCE[0]}"
+    DIR="$( dirname "$SOURCE" )"
+    while [ -h "$SOURCE" ]
+    do
+        SOURCE="$(readlink "$SOURCE")"
+        [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+        DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+    done
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    echo $DIR
+}
+
 #------------------------------------------------------------------------------
 # Source the flags processing library
 #------------------------------------------------------------------------------
-libpath=`dirname $0`'/libs'
+libpath=`_current_path`'/libs'
 . $libpath/shflags
 
 #------------------------------------------------------------------------------
