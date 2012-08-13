@@ -3,6 +3,35 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
+help=$(cat << 'EOF'
+
+A helper script for easily editing and commiting changes into git.
+
+    git-editfile.sh [-f] [-b] [-d] [-m] [-g] [-r] [-c <commit message>] [-s] <file>
+
+    <file> arg could be any were in the options list. For the convenient of
+    changing the flags, the following form is more usefull.
+
+    git-editfile.sh <file> [-f] [-b] [-d] [-m] [-g] [-r] [-c <commit message>] [-s]
+
+Options:
+
+    -f  Force the operation if not in a git repo
+        Force backup if file has not been changed
+        Force revert if file has been changed
+    -b  Backup <file> to <file>.bak
+    -d  Edit <file> and <file>.bak in vim diff mode
+    -m  Backup first, then diff edit the file
+    -g  Revert the changes introduced by <file> in the prefious
+        commit, the changed file were saved to <file>.bak
+    -r  Revert <file>.bak to <file>
+    -c  Commit <file> with <commit message>
+    -s  Commit <file> with message 'squash' for later rebasing.
+    -h  Show the help message
+
+EOF
+)
+
 while [ $# -gt 0 ]
 do
     case $1 in
@@ -26,7 +55,11 @@ do
             ;;
     '-s')   squash="TRUE"
             ;;
+    '-h')   echo "$help"
+            exit 0
+            ;;
       -*)   echo "Invalid Arg"
+            echo "$help"
             exit 1
             ;;
        *)   [ -z "$file" ] && file="$1" || {
