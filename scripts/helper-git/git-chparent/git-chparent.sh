@@ -3,7 +3,23 @@
 # vim: set tabstop=4 shiftwidth=4 expandtab autoindent:
 #
 
-while getopts :ab:p: opt
+help=$(cat << 'EOF'
+
+Change parent to a specific commit.
+
+Usage:
+
+    git-chparent.sh ([-a]|[-b <branch>]) -p <parent revision> <target revision>
+
+Options:
+
+    -a Filter on all branches
+    -b Branch to be filtered on
+    -p Reference of the new parent commit
+EOF
+)
+
+while getopts :ab:p:h opt
 do
     case $opt in
     'a')    all=TRUE
@@ -12,7 +28,11 @@ do
             ;;
     'p')    parent_commit=$(git rev-parse $OPTARG)
             ;;
+    'h')    echo "$help"
+            exit 0
+            ;;
       ?)    echo "invalid arg"
+            echo "$help"
             exit 1
             ;;
     esac
