@@ -82,9 +82,10 @@ fi
 mkdir -p $LOCAL_BIN
 
 for __category in ${__categories[@]}; do
-    _scripts='__scripts_'$__category
-    _scripts=$(eval echo \${$_scripts[@]})
-    for __script in ${_scripts[@]}; do
+    # Use indirect variable reference here
+    # @see http://unix.stackexchange.com/questions/20171
+    _scripts='__scripts_'$__category'[@]'
+    for __script in ${!_scripts}; do
         deploy $__script
     done
 done
