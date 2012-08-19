@@ -2,27 +2,26 @@
 
 LC_ALL=C
 
-dest=$1
+if [ -n "$1" ] && [ -d "$1" ]; then
+    dest=$1
+else
+    dest='.'
+fi
 
 workspace=`mktemp -d`
 
-rm -rf $dest.new && cp -rf $dest $dest.new
+tar -cf $workspace/backup.tar $dest
+echo "Backup $dest to $workspace/backup.tar"
 
 for file in `find $dest -type f`
 do
     # Only match date here, ignore time
     date=`stat $file | grep "Modify:" | cut -n -d: -f2- | sed 's/[0-9]\{2\}\(\.[0-9]\{9\} +[0-9]\{4\}\)/00\1/g'`
     file=${file#$dest/}
-    [ -f $dest.new/.gitignore ] && grep -q $file $dest.new/.gitignore || echo $file >> $workspace/files.`date -d "$date" '+%s'`
+    [ -f $dest/.gitignore ] && grep -q $file $dest/.gitignore || echo $file >> $workspace/files.`date -d "$date" '+%s'`
 done
 
-for file in `find $dest`
-do
-    date=`stat $file | grep "Modify:" | cut -n -d: -f2-`
-    touch -m -d "$date" "$dest.new${file#$dest}"
-done
-
-cd $dest.new
+cd $dest
 
 if ! $(git ls-files | grep -q $file); then
     git init
