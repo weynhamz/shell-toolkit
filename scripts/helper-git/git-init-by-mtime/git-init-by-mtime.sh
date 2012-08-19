@@ -24,7 +24,9 @@ done
 
 cd $dest.new
 
-git init
+if ! $(git ls-files | grep -q $file); then
+    git init
+fi
 
 for file in `ls -1 $workspace/files.* | sort`
 do
