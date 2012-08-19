@@ -52,7 +52,7 @@ __scripts_dotploy=(
 
 dolink() {
     [ -h "$2" ] && rm -v $2
-    ln -s $1 $2
+    ln -s -v $1 $2
 }
 
 deploy() {
