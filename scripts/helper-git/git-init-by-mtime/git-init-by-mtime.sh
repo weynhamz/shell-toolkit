@@ -10,9 +10,11 @@ fi
 
 workspace=`mktemp -d`
 
+#Backup
 tar -cf $workspace/backup.tar $dest
 echo "Backup $dest to $workspace/backup.tar"
 
+#Get date
 for file in `find $dest -type f`
 do
     # Only match date here, ignore time
@@ -23,10 +25,12 @@ done
 
 cd $dest
 
+#Check and init repo
 if ! $(git ls-files | grep -q $file); then
     git init
 fi
 
+#Commit files
 for file in `ls -1 $workspace/files.* | sort`
 do
     date=${file#$workspace/files.}
@@ -34,4 +38,5 @@ do
     git commit -m "`date -R --date="@$date"`" 2>&1 1>/dev/null
 done
 
+#Fix date
 git filter-branch -f --env-filter 'export GIT_AUTHOR_DATE=`git log -1 --pretty=%s $GIT_COMMIT` && export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE || cat' -- --all
