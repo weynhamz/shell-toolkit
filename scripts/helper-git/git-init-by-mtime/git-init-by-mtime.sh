@@ -34,6 +34,4 @@ do
     git commit -m "`date -R --date="@$date"`" 2>&1 1>/dev/null
 done
 
-git log --pretty=oneline > $workspace/gitlog
-
-git filter-branch -f --env-filter 'export GIT_AUTHOR_DATE=`grep $GIT_COMMIT '$workspace'/gitlog | cut -d" " -f2-` && export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE || cat' -- --all
+git filter-branch -f --env-filter 'export GIT_AUTHOR_DATE=`git log -1 --pretty=%s $GIT_COMMIT` && export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE || cat' -- --all
