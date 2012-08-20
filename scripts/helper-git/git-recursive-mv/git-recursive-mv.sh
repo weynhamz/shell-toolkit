@@ -39,6 +39,11 @@ do
 done
 shift $((OPTIND - 1))
 
+if [ ! -e ".git" ]; then
+    echo "require to be run at root of the git repo"
+    exit 1
+fi
+
 if [ -z "$sedexp" ]; then
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "source or dest file must be set."
