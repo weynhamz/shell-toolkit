@@ -9,7 +9,7 @@ Move file path in history.
 
 Usage:
 
-    git-recursive-mv.sh ([-a]|[-b <branch>]) -e <sed expression>
+    git-recursive-mv.sh ([-a]|[-b <branch>]) -e <sed expression> <source path> <dest path>
 
 Options:
 
@@ -40,8 +40,20 @@ done
 shift $((OPTIND - 1))
 
 if [ -z "$sedexp" ]; then
-    echo "Sed expresion not given"
-    exit 1
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "source or dest file must be set."
+        echo "Sed expresion not given"
+        echo "$help"
+        exit 1
+    else
+        src_path=${1%/}
+        dst_path=${2%/}
+
+        src_path=${src_path//\//\\\/}
+        dst_path=${dst_path//\//\\\/}
+
+        sedexp="s/\t$src_path/\t$dst_path/g"
+    fi
 fi
 
 [ -n "$all" ] && range='-- --all' || range='HEAD'
