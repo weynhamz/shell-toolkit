@@ -54,6 +54,29 @@ if [ -z "$sedexp" ]; then
         src_path=${1%/}
         dst_path=${2%/}
 
+        if [ -z "$src_path" ] || [ -z "$dst_path" ]
+        then
+            echo "source or dest file must be set."
+            echo "$help"
+            exit 1
+        fi
+
+        if [ ! -e $src_path ]
+        then
+            echo "$src_path does not existed"
+            exit 1
+        fi
+
+        if [ -d $dst_path ]
+        then
+            filename=${src_path##*/}
+            dst_path=${dst_path}/$filename
+        elif [ -e $dst_path ]
+        then
+            echo "$dst_path should not be existed"
+            exit 1
+        fi
+
         src_path=${src_path//\//\\\/}
         dst_path=${dst_path//\//\\\/}
 
