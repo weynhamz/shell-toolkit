@@ -20,45 +20,15 @@ _current_path() {
     echo $DIR
 }
 
-__categories=(
-    base
-    al
-    git
-    dotploy
-)
-
-__scripts_base=(
-    extclean.sh
-    mencoder.sh
-)
-__scripts_al=(
-    helper-al/makepkg.sh
-    helper-al/logsplit.sh
-    helper-al/epacman/epacman.sh
-    helper-al/epacman/epacman-refresh.sh
-)
-__scripts_git=(
-    helper-git/git-unpack.sh
-    helper-git/git-fixtime.sh
-    helper-git/git-editfile.sh
-    helper-git/git-cmprange.sh
-    helper-git/git-cleangit.sh
-    helper-git/git-chparent.sh
-    helper-git/git-subtree-extract.sh
-)
-__scripts_dotploy=(
-    dotploy/dotploy.sh
-)
-
 dolink() {
     [ -h "$2" ] && rm -v $2
-    ln -s $1 $2
+    ln -s -v $1 $2
 }
 
 deploy() {
     path=$1
     file=$(basename $path)
-    srcp=$(_current_path)'/scripts/'$path
+    srcp=$(_current_path)'/'$path
     dest=$LOCAL_BIN'/'$file
     if [ -h $dest ]; then
         cdst=$(realpath $dest 2>/dev/null)
@@ -81,13 +51,8 @@ fi
 
 mkdir -p $LOCAL_BIN
 
-for __category in ${__categories[@]}; do
-    # Use indirect variable reference here
-    # @see http://unix.stackexchange.com/questions/20171
-    _scripts='__scripts_'$__category'[@]'
-    for __script in ${!_scripts}; do
-        deploy $__script
-    done
+for __script in $(find scripts/ -type f -name "*.sh" | grep -v "tests/"); do
+    [ -x $__script ] && deploy $__script
 done
 
 echo "Deployment finished, please add '$LOCAL_BIN' to your \$PATH environmental variable."
