@@ -165,9 +165,6 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
         hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
     fi
     if [ -n "$time" ];then
-        if [ -n "$increase" ];then
-            timestamp=$(date --date="$time" +%s)
-        fi
         hashlist=$(echo "$hashlist" | sed "s/$/:$time/g")
     elif [ ! -n "$fix_committer_date_cmd" ];then
         echo "-d flag is required"
@@ -176,19 +173,24 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
 fi
 
 if [ -n "$source" ] || [ -n "$hashlist" ];then
+    if [ ! -n "$source" ] && [ -n "$time" ] && [ -n "$increase" ];then
+        timestamp=$(date --date="$time" +%s)
+    fi
+
     first=1
     test_cmd='{ '
     while IFS=: read -r commit time;do
+        if [ -n "$timestamp" ];then
+            [ ! -n "$random_minite" ] && random_minite=3
+            timestamp=$(($timestamp + $RANDOM%(60 * $random_minite) + 10))
+            time=$(LC_ALL=C date -R --date="@$timestamp")
+        fi
+
         commit=$(git rev-parse $commit)
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$time" ];then
-            if [ ! -n "$source" ] && [ -n "$increase" ];then
-                [ ! -n "$random_minite" ] && random_minite=3
-                timestamp=$(($timestamp + $RANDOM%(60 * $random_minite) + 10))
-                time=$(LC_ALL=C date -R --date="@$timestamp")
-            fi
             if [ -n "$change_author_date" ];then
                 test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$time'"'
             fi
