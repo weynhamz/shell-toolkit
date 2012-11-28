@@ -175,7 +175,7 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     fi
 fi
 
-if [ -n "$1" ] || [ -n "$source" ];then
+if [ -n "$source" ] || [ -n "$hashlist" ];then
     first=1
     test_cmd='{ '
     while IFS=: read -r commit time;do
