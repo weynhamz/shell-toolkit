@@ -118,6 +118,10 @@ do
                 arg_1=${arg%$arg_2}
                 args_new=$arg' '$arg_1' -'$arg_2' '$@
                 set -- $args_new
+            else
+                echo "Invalid Arg"
+                echo "$help"
+                exit 1
             fi
             ;;
         *)

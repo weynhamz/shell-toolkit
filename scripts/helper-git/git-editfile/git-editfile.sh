@@ -58,9 +58,20 @@ do
     '-h')   echo "$help"
             exit 0
             ;;
-      -*)   echo "Invalid Arg"
-            echo "$help"
-            exit 1
+      -*)
+            arg=$1
+            arg_2=${arg#-?}
+            if [ -n "$arg_2" ]; then
+                shift
+                arg_1=${arg%$arg_2}
+                args_new=$arg' '$arg_1' -'$arg_2' '"$@"
+                echo $args_new
+                set -- $args_new
+            else
+                echo "Invalid Arg"
+                echo "$help"
+                exit 1
+            fi
             ;;
        *)   [ -z "$file" ] && file="$1" || {
                 echo "File has been specified: $file, $1 is not valid."
