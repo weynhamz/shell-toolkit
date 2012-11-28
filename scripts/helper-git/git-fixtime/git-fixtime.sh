@@ -33,7 +33,7 @@
 #           git-fixtime.sh -f -a HEAD
 #           git-fixtime.sh -f -a a203382
 #           git-fixtime.sh -f -a a203382 b73215f
-#           git-fixtime.sh -f -a -r a203382~..b73215f
+#           git-fixtime.sh -f -a a203382~..b73215f
 #
 #   * Change the author date of the given commit[s] to a given date.
 #
@@ -59,8 +59,8 @@
 #   * Generate the time by randomly increasing the given time. The increasing
 #     range is 3 minitus, this could be changed by -m flag.
 #
-#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
-#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i a203382~..b73215f
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 a203382~..b73215f
 #
 #   * Read commits from a file.
 #
@@ -85,12 +85,18 @@
 #
 #   This script is just a wrapper to `git-filter-branch` whcih by default
 #   filtering all branches. In order to reduce the processing time, a specific
-#   branch contains the target commit[s] could be specified by flag '-b'.
+#   commits range could be specified with -r flag, or the branch contains the
+#   target commit[s] could be specified with -b flag.
 #
 #   If commit 'a203382' is in branch 'test', then the following command would
 #   be faster than the one without '-b' flag.
 #
 #       git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -b test a203382
+
+#   If commit 'a203382' is between commit 'ys2t311' and 'ac9d115', then the
+#   following command would be much faster.
+#
+#       git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -r ys2t311..ac9d115 a203382
 #
 #   If bad things happened, `git reflog` could help to get the last ref back.
 #
@@ -107,9 +113,9 @@ A script designed to simplify the procedure to alter git commit time.
 USAGE:
 
     git-fixtime.sh [ -h ]
-    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -s SOURCE_FILE
-    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
+    git-fixtime.sh [ -d ] [ -b BRANCH | -r RANGE ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -s SOURCE_FILE
+    git-fixtime.sh [ -d ] [ -b BRANCH | -r RANGE ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -d ] [ -b BRANCH | -r RANGE ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] START_COMMIT..FINISH_COMMIT
 
 OPTIONS:
 
@@ -118,7 +124,7 @@ OPTIONS:
         -h Show help message.
         -d Debugging, output the command.
         -b The branch to be filtered with.
-        -r The given argument is a commit range. Example: a203382..b73215f
+        -r Commits range to be filtered with. Example: a203382..b73215f
         -t Time string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -a Change author date to the given date.
         -c Change committer date to the given date.
@@ -133,14 +139,14 @@ EOF
 exit 0
 }
 
-while getopts :ab:cdfhim:rs:t: opt
+while getopts :ab:cdfhim:r:s:t: opt
 do
     case $opt in
     'd')    debug="TRUE"
             ;;
     'b')    branch="$OPTARG"
             ;;
-    'r')    isrange="TRUE"
+    'r')    cmrange="$OPTARG"
             ;;
     't')    time=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && {
@@ -178,6 +184,8 @@ shift $((OPTIND - 1))
 
 if [ -n "$branch" ]; then
     range="$branch"
+elif [ -n "$cmrange" ]; then
+    range="-- $cmrange"
 else
     range='-- --all'
 fi
@@ -189,7 +197,7 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
         exit 1
     fi
 
-    if [ -n "$isrange" ];then
+    if [ $# -eq 1 ] && [ $(git rev-parse $1 | wc -l) -eq 2 ];then
         hashlist=$(git rev-list --reverse $1)
     else
         hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
