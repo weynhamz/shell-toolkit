@@ -165,9 +165,6 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     fi
     if [ -n "$time" ];then
         hashlist=$(echo "$hashlist" | sed "s/$/:$time/g")
-    elif [ ! -n "$fix_committer_date_cmd" ];then
-        echo "-d flag is required"
-        exit 1
     fi
 fi
 
@@ -209,10 +206,6 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
 fi
 
 if [ -n "$time" ];then
-    if [ -z "$commit" ] && [ ! -n "$isrange" ];then
-        echo "commit or range not set"
-        exit 1
-    fi
     if [ ! -n "$change_author_date" ] && [ ! -n "$change_committer_date" ];then
         echo "one of -a or -c flag must be set"
         exit 1
