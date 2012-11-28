@@ -123,7 +123,11 @@ do
     'r')    isrange="TRUE"
             ;;
     't')    time=$(LC_ALL=C date -R --date="$OPTARG")
-            [ $? -eq 1 ] && exit 1
+            [ $? -eq 1 ] && {
+                echo "Invalid time string"
+                showhelp
+                exit 1
+            }
             ;;
     'a')    change_atime="TRUE"
             ;;
@@ -135,6 +139,7 @@ do
             ;;
     'm')    [ $OPTARG -gt 0 ] || {
                 echo "Invalid random range arg"
+                showhelp
                 exit 1
             }
             increase_range=$OPTARG
@@ -144,6 +149,7 @@ do
     'h')    showhelp
             ;;
       ?)    echo "Invalid Arguments"
+            showhelp
             exit 1
             ;;
     esac
@@ -157,6 +163,12 @@ else
 fi
 
 if [ -n "$1" ] && [ ! -n "$source" ];then
+    if [ ! -n "$time" ] && [ ! -n "$fix_committer_date_cmd" ];then
+        echo "one of -t or -f flag must be set"
+        showhelp
+        exit 1
+    fi
+
     if [ -n "$isrange" ];then
         hashlist=$(git rev-list --reverse $1)
     else
@@ -164,6 +176,25 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     fi
     if [ -n "$time" ];then
         hashlist=$(echo "$hashlist" | sed "s/$/:$time/g")
+    fi
+elif [ -n "$source" ];then
+    if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ] && \
+        [ ! -n "$fix_committer_date_cmd" ];then
+        echo "one of -a, -c or -f flag must be set"
+        showhelp
+        exit 1
+    fi
+else
+    echo "either -s flag or the commit[s] to be changed must be set"
+    showhelp
+    exit 1
+fi
+
+if [ -n "$time" ];then
+    if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ];then
+        echo "one of -a or -c flag must be set"
+        showhelp
+        exit 1
     fi
 fi
 
@@ -204,15 +235,9 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
     test_cmd=$test_cmd'; }'
 fi
 
-if [ -n "$time" ];then
-    if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ];then
-        echo "one of -a or -c flag must be set"
-        exit 1
-    fi
-fi
-
 if [ ! -n "$test_cmd" ] && [ ! -n "$fix_committer_date_cmd" ];then
     echo "no flag and no argument speified"
+    showhelp
     exit 1
 elif [ ! -n "$test_cmd" ];then
     test_cmd="cat"
