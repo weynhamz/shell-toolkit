@@ -156,8 +156,6 @@ else
     range='-- --all'
 fi
 
-test_cmd='cat'
-
 if [ -n "$1" ] && [ ! -n "$source" ];then
     if [ -n "$isrange" ];then
         hashlist=$(git rev-list --reverse $1)
@@ -216,9 +214,11 @@ if [ -n "$time" ];then
     fi
 fi
 
-if [ "$test_cmd" == "cat" ] && [ ! -n "$fix_committer_date_cmd" ];then
+if [ ! -n "$test_cmd" ] && [ ! -n "$fix_committer_date_cmd" ];then
     echo "no flag and no argument speified"
     exit 1
+elif [ ! -n "$test_cmd" ];then
+    test_cmd="cat"
 fi
 
 cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'' '${range}
