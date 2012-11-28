@@ -137,7 +137,7 @@ do
                 echo "Invalid random range arg"
                 exit 1
             }
-            random_minite=$OPTARG
+            increase_range=$OPTARG
             ;;
     's')    source="TRUE"
             source_file=$OPTARG
@@ -177,8 +177,8 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
     test_cmd='{ '
     while IFS=: read -r commit time;do
         if [ -n "$timestamp" ];then
-            [ ! -n "$random_minite" ] && random_minite=3
-            timestamp=$(($timestamp + $RANDOM%(60 * $random_minite) + 10))
+            [ ! -n "$increase_range" ] && increase_range=3
+            timestamp=$(($timestamp + $RANDOM%(60 * $increase_range) + 10))
             time=$(LC_ALL=C date -R --date="@$timestamp")
         fi
 
