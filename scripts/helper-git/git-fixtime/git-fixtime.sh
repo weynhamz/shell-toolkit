@@ -8,7 +8,7 @@
 #
 # AUTHOR: Techlive Zheng <techlivezheng@gmail.com>
 #
-# Fix the time mass caused by the git rebase or other git operations.
+# Fix the timestamp mess caused by the git rebase or other git operations.
 # Set the author date and/or committer date of certain commit to specific time.
 #
 # EXAMPLEA:
@@ -19,55 +19,56 @@
 #
 #   * Change the committer date of the given commit[s] to its author date.
 #
-#           git-fixtime.sh -f HEAD                  # Any valid ref in git
+#           git-fixtime.sh -f HEAD
 #           git-fixtime.sh -f a203382
 #           git-fixtime.sh -f a203382 b73215f
-#           git-fixtime.sh -f -r a203382~..b73215f  # All the commits between
-#                                                     a203382 and b73215f, the
-#                                                     appended ~ of a203382 is
-#                                                     necessary.
+#           git-fixtime.sh -f -r a203382~..b73215f
 #
 #   * Change the author date of the given commit[s] to a given date.
 #
 #           git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#
+#   * Change the committer date of the given commit[s] to a given date.
+#
+#           git-fixtime.sh -c -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * Change the author date as well as committer date of the given commit[s]
 #     to a given date.
 #
 #           git-fixtime.sh -a -c -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
-#       Equals to
+#       Or
 #
 #           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * The following will do nothing, it is nouse.
 #
-#           git-fixtime.sh -c -f -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
+#           git-fixtime.sh -f -c -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
 #   * Generate the time by randomly increasing the given time. The increasing
 #     range is 3 minitus, this could be changed by -m flag.
 #
-#           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
-#           git-fixtime.sh -a -f -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
 #
 #   * Read commit and time info from a file with each line in a 'commit:time'
 #     format.
 #
-#           git-fixtime.sh -a -f -s some_file
+#           git-fixtime.sh -f -a -s some_file
 #
 #       Example of some_file:
 #
 #           a203382:Mon, 07 Aug 2006 12:34:56 -0600
 #           b73215f:Mon, 07 Aug 2006 12:34:56 -0600
 #
-#   -d flag could be used to examing the command before an actural performing.
+#   Use '-d' flag to examing the command before an actural performing.
 #
 #   This script is just a wrapper to `git-filter-branch` whcih by default
-#   filtering all branches, in order to reduce the processing time, a specific
-#   branch which contains the target commit[s] could be specified by flag -b.
+#   filtering all branches. In order to reduce the processing time, a specific
+#   branch contains the target commit[s] could be specified by flag '-b'.
 #
-#   For example, if commit 'a203382' is in branch 'test', then the following
-#   command would be faster than the one without '-b' flag.
+#   If commit 'a203382' is in branch 'test', then the following command would
+#   be faster than the one without '-b' flag.
 #
 #       git-fixtime.sh -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -b test a203382
 #
@@ -85,26 +86,26 @@ A script designed to simplify the procedure to alter git commit time.
 
 USAGE:
 
-    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
-    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
-    git-fixtime.sh [ -d ] [ -f ] [ -b BRANCH ] ( -a | -c ) -s SOURCE_FILE
     git-fixtime.sh [ -h ]
+    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
+    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
 
 OPTIONS:
 
     Options in '[]' is optional, '( -a | -c )' means either '-a' or '-c' has to be specified.
 
-        -a Change author date to the given date.
-        -b The branch to be filtered with.
-        -c Change committer date to the given date.
-        -t Time format string. Example: Mon, 07 Aug 2006 12:34:56 -0600
-        -f Set commiter date same as author date.
-        -r The given argument is a commit range. Example: a203382..b73215f
-        -d Debug mode, output the command to be executed.
-        -i Generate the time by randomly increasing the given time.
-        -m Specify the increasing range of -i flag in mintes, default is 3 minites.
-        -s Read commit and date info from a file with each line in a 'commit:date' format.
         -h Show help message.
+        -d Debugging, output the command.
+        -b The branch to be filtered with.
+        -r The given argument is a commit range. Example: a203382..b73215f
+        -t Time string. Example: Mon, 07 Aug 2006 12:34:56 -0600
+        -a Change author date to the given date.
+        -c Change committer date to the given date.
+        -f Change committer date to the author date.
+        -i Generate time by randomly increasing from the given time.
+        -m Increasing range of -i flag in mintes, default is 3 minites.
+        -s Read commit and date info from a file with each line in 'commit:date' format.
 
     For more example, please read the source.
 
@@ -115,25 +116,25 @@ exit 0
 while getopts :ab:cdfhim:rs:t: opt
 do
     case $opt in
+    'd')    debug="TRUE"
+            ;;
+    'b')    branch="$OPTARG"
+            ;;
+    'r')    isrange="TRUE"
+            ;;
     't')    time=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && exit 1
             ;;
     'a')    change_author_date="TRUE"
             ;;
-    'b')    branch="$OPTARG"
-            ;;
     'c')    change_committer_date="TRUE"
             ;;
     'f')    fix_committer_date_cmd='&& export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE'
             ;;
-    'r')    isrange="TRUE"
-            ;;
-    'd')    debug="TRUE"
-            ;;
     'i')    increase="TRUE"
             ;;
     'm')    [ $OPTARG -gt 0 ] || {
-                echo "Invalide random range arg"
+                echo "Invalid random range arg"
                 exit 1
             }
             random_minite=$OPTARG
@@ -143,7 +144,7 @@ do
             ;;
     'h')    showhelp
             ;;
-      ?)    echo "Invalid Arg"
+      ?)    echo "Invalid Arguments"
             exit 1
             ;;
     esac
@@ -185,7 +186,9 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
         fi
 
         commit=$(git rev-parse $commit)
+
         [ $first -eq 0 ] && test_cmd=$test_cmd' || '
+
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$time" ];then
@@ -197,7 +200,9 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
             fi
         fi
         test_cmd=$test_cmd'; }'
+
         first=0
+
         shift
     done < <([ -n "$source" ] && [ -f $source_file ] && cat $source_file || echo "$hashlist")
     test_cmd=$test_cmd'; }'
