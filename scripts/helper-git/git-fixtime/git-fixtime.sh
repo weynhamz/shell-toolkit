@@ -62,6 +62,15 @@
 #           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -r a203382~..b73215f
 #           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -m 10 -r a203382~..b73215f
 #
+#   * Read commits from a file.
+#
+#           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" -i -s some_file
+#
+#       Example of some_file:
+#
+#           a203382
+#           b73215f
+#
 #   * Read commit and time info from a file with each line in a 'commit:time'
 #     format.
 #
@@ -98,7 +107,7 @@ A script designed to simplify the procedure to alter git commit time.
 USAGE:
 
     git-fixtime.sh [ -h ]
-    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] ( -a | -c ) -s SOURCE_FILE
+    git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -s SOURCE_FILE
     git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] COMMIT1 COMMIT2 ...
     git-fixtime.sh [ -d ] [ -b BRANCH ] [ -f ] [ ( -a | -c ) -t TIME [ -i [ -m INCREASING_RANGE ] ] ] -r COMMIT1..COMMIT2
 
@@ -116,7 +125,7 @@ OPTIONS:
         -f Fix the other date according to -a or -c.
         -i Generate time by randomly increasing from the given time.
         -m Increasing range of -i flag in mintes, default is 3 minites.
-        -s Read commit and date info from a file with each line in 'commit:date' format.
+        -s Read commit [and date info] from a file with each line in 'commit[:date]' format.
 
     For more example, please read the source.
 
@@ -185,9 +194,6 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     else
         hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
     fi
-    if [ -n "$time" ];then
-        hashlist=$(echo "$hashlist" | sed "s/$/:$time/g")
-    fi
 elif [ -n "$source" ];then
     if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ] && \
         [ ! -n "$fix_time" ];then
@@ -210,7 +216,7 @@ if [ -n "$time" ] || [ -n "$fix_time" ];then
 fi
 
 if [ -n "$source" ] || [ -n "$hashlist" ];then
-    if [ ! -n "$source" ] && [ -n "$time" ] && [ -n "$increase" ];then
+    if [ -n "$time" ] && [ -n "$increase" ];then
         timestamp=$(date --date="$time" +%s)
     fi
 
