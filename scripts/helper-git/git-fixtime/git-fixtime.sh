@@ -158,7 +158,7 @@ fi
 
 test_cmd='cat'
 
-if [ -n "$1" ] || [ ! -n "$source" ];then
+if [ -n "$1" ] && [ ! -n "$source" ];then
     if [ -n "$isrange" ];then
         hashlist=$(git rev-list --reverse $1)
     else
