@@ -125,9 +125,9 @@ do
     't')    time=$(LC_ALL=C date -R --date="$OPTARG")
             [ $? -eq 1 ] && exit 1
             ;;
-    'a')    change_author_date="TRUE"
+    'a')    change_atime="TRUE"
             ;;
-    'c')    change_committer_date="TRUE"
+    'c')    change_ctime="TRUE"
             ;;
     'f')    fix_committer_date_cmd='&& export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE'
             ;;
@@ -189,10 +189,10 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
         if [ -n "$time" ];then
-            if [ -n "$change_author_date" ];then
+            if [ -n "$change_atime" ];then
                 test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$time'"'
             fi
-            if [ -n "$change_committer_date" ];then
+            if [ -n "$change_ctime" ];then
                 test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$time'"'
             fi
         fi
@@ -206,7 +206,7 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
 fi
 
 if [ -n "$time" ];then
-    if [ ! -n "$change_author_date" ] && [ ! -n "$change_committer_date" ];then
+    if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ];then
         echo "one of -a or -c flag must be set"
         exit 1
     fi
