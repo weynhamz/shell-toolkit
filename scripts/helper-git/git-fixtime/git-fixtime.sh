@@ -230,11 +230,15 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
 
     first=1
     test_cmd='{ '
-    while IFS=: read -r commit time;do
+    while IFS=: read -r commit targetime;do
+        if [ ! -n "$targetime" ];then
+            targetime="$time"
+        fi
+
         if [ -n "$timestamp" ];then
             [ ! -n "$increase_range" ] && increase_range=3
             timestamp=$(($timestamp + $RANDOM%(60 * $increase_range) + 10))
-            time=$(LC_ALL=C date -R --date="@$timestamp")
+            targetime=$(LC_ALL=C date -R --date="@$timestamp")
         fi
 
         commit=$(git rev-parse $commit)
@@ -243,12 +247,12 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
 
         test_cmd=$test_cmd'{ '
         test_cmd=$test_cmd'test $GIT_COMMIT = "'$commit'"'
-        if [ -n "$time" ];then
+        if [ -n "$targetime" ];then
             if [ -n "$change_atime" ];then
-                test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$time'"'
+                test_cmd=$test_cmd' &&  export GIT_AUTHOR_DATE="'$targetime'"'
             fi
             if [ -n "$change_ctime" ];then
-                test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$time'"'
+                test_cmd=$test_cmd' &&  export GIT_COMMITTER_DATE="'$targetime'"'
             fi
         fi
         test_cmd=$test_cmd'; }'
