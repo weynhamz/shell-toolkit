@@ -209,8 +209,8 @@ elif [ -n "$source" ];then
         showhelp
         exit 1
     fi
-else
-    echo "either -s flag or the commit[s] to be changed must be set"
+elif [ ! -n "$fix_time" ];then
+    echo "either -s flag, -f flag or the commit[s] to be changed must be set"
     showhelp
     exit 1
 fi
