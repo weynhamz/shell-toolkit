@@ -136,7 +136,6 @@ OPTIONS:
     For more example, please read the source.
 
 EOF
-exit 0
 }
 
 while getopts :ab:cdfhim:r:s:t: opt
@@ -173,6 +172,7 @@ do
     's')    source="$OPTARG"
             ;;
     'h')    showhelp
+            exit 0
             ;;
       ?)    echo "Invalid Arguments"
             showhelp
