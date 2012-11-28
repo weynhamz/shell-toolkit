@@ -13,16 +13,27 @@
 #
 # EXAMPLEA:
 #
-#   * Change the committer date of all the commits to its author date.
+#   * Change the author date of all the commits to its committer date.
 #
-#           git-fixtime.sh -f
+#           git-fixtime.sh -f -c
 #
 #   * Change the committer date of the given commit[s] to its author date.
 #
-#           git-fixtime.sh -f HEAD
-#           git-fixtime.sh -f a203382
-#           git-fixtime.sh -f a203382 b73215f
-#           git-fixtime.sh -f -r a203382~..b73215f
+#           git-fixtime.sh -f -c HEAD
+#           git-fixtime.sh -f -c a203382
+#           git-fixtime.sh -f -c a203382 b73215f
+#           git-fixtime.sh -f -c a203382~..b73215f
+
+#   * Change the committer date of all the commits to its author date.
+#
+#           git-fixtime.sh -f -a
+#
+#   * Change the committer date of the given commit[s] to its author date.
+#
+#           git-fixtime.sh -f -a HEAD
+#           git-fixtime.sh -f -a a203382
+#           git-fixtime.sh -f -a a203382 b73215f
+#           git-fixtime.sh -f -a -r a203382~..b73215f
 #
 #   * Change the author date of the given commit[s] to a given date.
 #
@@ -41,7 +52,7 @@
 #
 #           git-fixtime.sh -f -a -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
-#   * The following will do nothing, it is nouse.
+#       Or
 #
 #           git-fixtime.sh -f -c -t "Mon, 07 Aug 2006 12:34:56 -0600" a203382
 #
@@ -102,7 +113,7 @@ OPTIONS:
         -t Time string. Example: Mon, 07 Aug 2006 12:34:56 -0600
         -a Change author date to the given date.
         -c Change committer date to the given date.
-        -f Change committer date to the author date.
+        -f Fix the other date according to -a or -c.
         -i Generate time by randomly increasing from the given time.
         -m Increasing range of -i flag in mintes, default is 3 minites.
         -s Read commit and date info from a file with each line in 'commit:date' format.
@@ -129,11 +140,11 @@ do
                 exit 1
             }
             ;;
+    'f')    fix_time="TRUE"
+            ;;
     'a')    change_atime="TRUE"
             ;;
     'c')    change_ctime="TRUE"
-            ;;
-    'f')    fix_committer_date_cmd='&& export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE'
             ;;
     'i')    increase="TRUE"
             ;;
@@ -163,7 +174,7 @@ else
 fi
 
 if [ -n "$1" ] && [ ! -n "$source" ];then
-    if [ ! -n "$time" ] && [ ! -n "$fix_committer_date_cmd" ];then
+    if [ ! -n "$time" ] && [ ! -n "$fix_time" ];then
         echo "one of -t or -f flag must be set"
         showhelp
         exit 1
@@ -179,7 +190,7 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     fi
 elif [ -n "$source" ];then
     if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ] && \
-        [ ! -n "$fix_committer_date_cmd" ];then
+        [ ! -n "$fix_time" ];then
         echo "one of -a, -c or -f flag must be set"
         showhelp
         exit 1
@@ -190,7 +201,7 @@ else
     exit 1
 fi
 
-if [ -n "$time" ];then
+if [ -n "$time" ] || [ -n "$fix_time" ];then
     if [ ! -n "$change_atime" ] && [ ! -n "$change_ctime" ];then
         echo "one of -a or -c flag must be set"
         showhelp
@@ -235,7 +246,13 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
     test_cmd=$test_cmd'; }'
 fi
 
-if [ ! -n "$test_cmd" ] && [ ! -n "$fix_committer_date_cmd" ];then
+if [ -n "$fix_time" ] && [ -n "$change_atime" ];then
+    fix_time_cmd='&& export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE'
+elif [ -n "$fix_time" ] && [ -n "$change_ctime" ];then
+    fix_time_cmd='&& export GIT_AUTHOR_DATE=$GIT_COMMITTER_DATE'
+fi
+
+if [ ! -n "$test_cmd" ] && [ ! -n "$fix_time_cmd" ];then
     echo "no flag and no argument speified"
     showhelp
     exit 1
@@ -243,7 +260,7 @@ elif [ ! -n "$test_cmd" ];then
     test_cmd="cat"
 fi
 
-cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || cat'\'' '${range}
+cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_time_cmd}' || cat'\'' '${range}
 
 [ -n "$debug" ] && echo $cmd
 
