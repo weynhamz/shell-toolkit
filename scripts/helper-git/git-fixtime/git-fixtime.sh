@@ -198,7 +198,6 @@ if [ -n "$1" ] && [ ! -n "$source" ];then
     fi
 
     if [ $# -eq 1 ] && [ $(git rev-parse $1 | wc -l) -eq 2 ];then
-        range="-- $1"
         hashlist=$(git rev-list --reverse $1)
     else
         hashlist=$(echo -e "$(echo "$*" | sed "s/ \{1,\}/\n/g")")
