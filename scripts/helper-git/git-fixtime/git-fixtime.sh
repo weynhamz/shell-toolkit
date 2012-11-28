@@ -139,8 +139,7 @@ do
             }
             increase_range=$OPTARG
             ;;
-    's')    source="TRUE"
-            source_file=$OPTARG
+    's')    source="$OPTARG"
             ;;
     'h')    showhelp
             ;;
@@ -201,7 +200,7 @@ if [ -n "$source" ] || [ -n "$hashlist" ];then
         first=0
 
         shift
-    done < <([ -n "$source" ] && [ -f $source_file ] && cat $source_file || echo "$hashlist")
+    done < <([ -n "$source" ] && [ -f "$source" ] && cat "$source" || echo "$hashlist")
     test_cmd=$test_cmd'; }'
 fi
 
