@@ -221,7 +221,7 @@ elif [ ! -n "$test_cmd" ];then
     test_cmd="cat"
 fi
 
-cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || export GIT_COMMITTER_DATE=$GIT_COMMITTER_DATE'\'' '${range}
+cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_committer_date_cmd}' || cat'\'' '${range}
 
 [ -n "$debug" ] && echo $cmd
 
