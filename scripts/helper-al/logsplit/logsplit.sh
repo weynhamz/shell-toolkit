@@ -49,6 +49,7 @@ BACKUPOLDDIR=/var/log/.backup/old
 # Split log files by the command
 #
 split(){
+	local i
 	local output=${2:-1}
 	for i in `cat $1 | cut -d: -f1,2,3 | sed 's/  / /g' | cut -d' ' -f5- | sed 's/\[[[:alnum:]]*\]//g' | sed 's/\[.*\]//g' | sed 's/^ *//g' | sed 's/ *$//g' | sed 's/://g' | sort -u`
 	do
@@ -61,6 +62,7 @@ split(){
 # Recursively split rotated log files
 #
 splitr() {
+	delcare -i next
 	next=1
 	while [ -f $1.$next ]
 	do
@@ -74,6 +76,9 @@ splitr() {
 # Combine rotated log files into one
 #
 combine() {
+	declare -i prev
+	declare -i next
+
 	mkdir -p $BACKUPOLDDIR
 
 	prev=1
@@ -104,6 +109,7 @@ combine() {
 # the rotated files into one
 #
 mksingle() {
+	local j
 	mkdir -p $BACKUPDIR
 	cd $OLDDIR
 	for j in ${LOGS[@]}
