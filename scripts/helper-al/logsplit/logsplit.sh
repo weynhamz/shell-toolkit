@@ -45,35 +45,6 @@ BACKUPDIR=/var/log/.backup
 PROCESSDIR=/var/log/.process
 BACKUPOLDDIR=/var/log/.backup/old
 
-clean() {
-	mkdir -p $PROCESSDIR/auth
-	mv auth.log.*     $PROCESSDIR/auth
-
-	mkdir -p $PROCESSDIR/user
-	mv user.log.*     $PROCESSDIR/user
-
-	mkdir -p $PROCESSDIR/mail
-	for i in `ls -1 mail.log.*`;do
-		mv *${i#mail.log} $PROCESSDIR/mail
-	done
-
-	mkdir -p $PROCESSDIR/cron
-	for i in `ls -1 crond.log.*`;do
-		mv *${i#crond.log} $PROCESSDIR/cron
-	done
-
-	mkdir -p $PROCESSDIR/errors
-	mv errors.log.* $PROCESSDIR/errors
-
-	mkdir -p $PROCESSDIR/messages
-	mv messages.log.* $PROCESSDIR/messages
-
-	mkdir -p $PROCESSDIR/left
-	mv *.log.* $PROCESSDIR/left
-
-	mv $PROCESSDIR/user/user.log.shutdown $PROCESSDIR/left
-}
-
 split(){
 	for i in `cat $1 | cut -d: -f1,2,3 | sed 's/  / /g' | cut -d' ' -f5- | sed 's/\[[[:alnum:]]*\]//g' | sed 's/\[.*\]//g' | sed 's/^ *//g' | sed 's/ *$//g' | sed 's/://g' | sort -u`
 	do
@@ -140,7 +111,33 @@ if [[ $SPLIT -eq 1 ]];then
 		do
 			[ -f $j ] && split $j
 		done
-		clean
+
+		mkdir -p $PROCESSDIR/auth
+		mv auth.log.*     $PROCESSDIR/auth
+
+		mkdir -p $PROCESSDIR/user
+		mv user.log.*     $PROCESSDIR/user
+
+		mkdir -p $PROCESSDIR/mail
+		for i in `ls -1 mail.log.*`;do
+			mv *${i#mail.log} $PROCESSDIR/mail
+		done
+
+		mkdir -p $PROCESSDIR/cron
+		for i in `ls -1 crond.log.*`;do
+			mv *${i#crond.log} $PROCESSDIR/cron
+		done
+
+		mkdir -p $PROCESSDIR/errors
+		mv errors.log.* $PROCESSDIR/errors
+
+		mkdir -p $PROCESSDIR/messages
+		mv messages.log.* $PROCESSDIR/messages
+
+		mkdir -p $PROCESSDIR/left
+		mv *.log.* $PROCESSDIR/left
+
+		mv $PROCESSDIR/user/user.log.shutdown $PROCESSDIR/left
 	fi
 fi
 
