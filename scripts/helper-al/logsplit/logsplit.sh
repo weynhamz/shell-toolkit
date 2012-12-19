@@ -45,6 +45,9 @@ BACKUPDIR=/var/log/.backup
 PROCESSDIR=/var/log/.process
 BACKUPOLDDIR=/var/log/.backup/old
 
+#
+# Split log files by the command
+#
 split(){
 	for i in `cat $1 | cut -d: -f1,2,3 | sed 's/  / /g' | cut -d' ' -f5- | sed 's/\[[[:alnum:]]*\]//g' | sed 's/\[.*\]//g' | sed 's/^ *//g' | sed 's/ *$//g' | sed 's/://g' | sort -u`
 	do
@@ -53,6 +56,9 @@ split(){
 	sed -i 's/\[[[:alnum:]]*\]//g' *.log.*
 }
 
+#
+# Recursively split rotated log files
+#
 splitr() {
 	next=1
 	while [ -f $1.$next ]
@@ -63,6 +69,9 @@ splitr() {
 
 }
 
+#
+# Combine rotated log files into one
+#
 combine() {
 	mkdir -p $BACKUPOLDDIR
 
@@ -89,6 +98,10 @@ combine() {
 	fi
 }
 
+#
+# Merge the current log file along with
+# the rotated files into one
+#
 mksingle() {
 	mkdir -p $BACKUPDIR
 	cd $OLDDIR
