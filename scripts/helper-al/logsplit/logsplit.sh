@@ -133,7 +133,7 @@ mksingle() {
 	done
 }
 
-if [ $SPLIT -eq 1 ];then
+if [[ $SPLIT -eq 1 ]];then
 	if [ -n "$1" ];then
 		split $1
 	else
@@ -146,7 +146,7 @@ if [ $SPLIT -eq 1 ];then
 	fi
 fi
 
-if [ $COMBINE -eq 1 ];then
+if [[ $COMBINE -eq 1 ]];then
 	if [ -n "$1" ];then
 		combine $1
 	else
@@ -158,6 +158,6 @@ if [ $COMBINE -eq 1 ];then
 	fi
 fi
 
-if [ $MERGE -eq 1 ];then
+if [[ $MERGE -eq 1 ]];then
 	mksingle
 fi
