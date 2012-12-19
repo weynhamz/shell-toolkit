@@ -26,8 +26,6 @@ done
 
 shift $((OPTIND - 1))
 
-#dmesg.log
-#pacman.log
 LOGS=(
 	"user.log"
 	"auth.log"
