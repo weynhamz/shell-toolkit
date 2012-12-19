@@ -26,8 +26,6 @@ done
 
 shift $((OPTIND - 1))
 
-#dmesg.log
-#pacman.log
 LOGS=(
 	"user.log"
 	"auth.log"
@@ -47,81 +45,72 @@ BACKUPDIR=/var/log/.backup
 PROCESSDIR=/var/log/.process
 BACKUPOLDDIR=/var/log/.backup/old
 
-mkdir -p $BACKUPDIR
-mkdir -p $BACKUPOLDDIR
-
-clean() {
-	mkdir -p $PROCESSDIR/auth
-	mv auth.log.*     $PROCESSDIR/auth
-
-	mkdir -p $PROCESSDIR/user
-	mv user.log.*     $PROCESSDIR/user
-
-	mkdir -p $PROCESSDIR/mail
-	for i in `ls -1 mail.log.*`;do
-		mv *${i#mail.log} $PROCESSDIR/mail
-	done
-
-	mkdir -p $PROCESSDIR/cron
-	for i in `ls -1 crond.log.*`;do
-		mv *${i#crond.log} $PROCESSDIR/cron
-	done
-
-	mkdir -p $PROCESSDIR/errors
-	mv errors.log.* $PROCESSDIR/errors
-
-	mkdir -p $PROCESSDIR/messages
-	mv messages.log.* $PROCESSDIR/messages
-
-	mkdir -p $PROCESSDIR/left
-	mv *.log.* $PROCESSDIR/left
-
-	mv $PROCESSDIR/user/user.log.shutdown $PROCESSDIR/left
-}
-
+#
+# Split log files by the command
+#
 split(){
+	local i
+	local output=${2:-1}
 	for i in `cat $1 | cut -d: -f1,2,3 | sed 's/  / /g' | cut -d' ' -f5- | sed 's/\[[[:alnum:]]*\]//g' | sed 's/\[.*\]//g' | sed 's/^ *//g' | sed 's/ *$//g' | sed 's/://g' | sort -u`
 	do
-		grep -E "($HOSTNAME $i:|$HOSTNAME $i\[[[:alnum:]]*\]:)" $1 > $1.$(echo $i | sed 's:/:_:g')
+		grep -E "($HOSTNAME $i:|$HOSTNAME $i\[[[:alnum:]]*\]:)" $1 > ${output}.$(echo $i | sed 's:/:_:g')
 	done
 	sed -i 's/\[[[:alnum:]]*\]//g' *.log.*
 }
 
+#
+# Recursively split rotated log files
+#
 splitr() {
+	delcare -i next
 	next=1
 	while [ -f $1.$next ]
 	do
-		split $1
+		split $1 $1.next
 		next=$(expr $next + 1)
 	done
 
 }
 
+#
+# Combine rotated log files into one
+#
 combine() {
-	start=1
-	if [ -f $1.$start ];then
-		cp $1.$start $1.$start.tmp
-		mv $1.$start $BACKUPOLDDIR
+	declare -i prev
+	declare -i next
 
-		next=$(expr $start + 1)
+	mkdir -p $BACKUPOLDDIR
+
+	prev=1
+	if [ -f $1.$prev ];then
+		cp $1.$prev $1.$prev.tmp
+		mv $1.$prev $BACKUPOLDDIR
+
+		next=$(expr $prev + 1)
 		while [ -f $1.$next ]
 		do
 			cp $1.$next $1.$next.tmp
 			mv $1.$next $BACKUPOLDDIR
 
-			cat $1.$start.tmp >> $1.$next.tmp
-			rm $1.$start.tmp
+			cat $1.$prev.tmp >> $1.$next.tmp
+			rm $1.$prev.tmp
 
-			start=$next
+			prev=$next
 
 			next=$(expr $next + 1)
 		done
 
-		mv $1.$start.tmp $1-combined
+		mv $1.$prev.tmp $1-combined
 	fi
 }
 
+#
+# Merge the current log file along with
+# the rotated files into one
+#
 mksingle() {
+	local j
+	mkdir -p $BACKUPDIR
 	cd $OLDDIR
 	for j in ${LOGS[@]}
 	do
@@ -133,7 +122,7 @@ mksingle() {
 	done
 }
 
-if [ $SPLIT -eq 1 ];then
+if [[ $SPLIT -eq 1 ]];then
 	if [ -n "$1" ];then
 		split $1
 	else
@@ -142,11 +131,37 @@ if [ $SPLIT -eq 1 ];then
 		do
 			[ -f $j ] && split $j
 		done
-		clean
+
+		mkdir -p $PROCESSDIR/auth
+		mv auth.log.*     $PROCESSDIR/auth
+
+		mkdir -p $PROCESSDIR/user
+		mv user.log.*     $PROCESSDIR/user
+
+		mkdir -p $PROCESSDIR/mail
+		for i in `ls -1 mail.log.*`;do
+			mv *${i#mail.log} $PROCESSDIR/mail
+		done
+
+		mkdir -p $PROCESSDIR/cron
+		for i in `ls -1 crond.log.*`;do
+			mv *${i#crond.log} $PROCESSDIR/cron
+		done
+
+		mkdir -p $PROCESSDIR/errors
+		mv errors.log.* $PROCESSDIR/errors
+
+		mkdir -p $PROCESSDIR/messages
+		mv messages.log.* $PROCESSDIR/messages
+
+		mkdir -p $PROCESSDIR/left
+		mv *.log.* $PROCESSDIR/left
+
+		mv $PROCESSDIR/user/user.log.shutdown $PROCESSDIR/left
 	fi
 fi
 
-if [ $COMBINE -eq 1 ];then
+if [[ $COMBINE -eq 1 ]];then
 	if [ -n "$1" ];then
 		combine $1
 	else
@@ -158,6 +173,6 @@ if [ $COMBINE -eq 1 ];then
 	fi
 fi
 
-if [ $MERGE -eq 1 ];then
+if [[ $MERGE -eq 1 ]];then
 	mksingle
 fi
