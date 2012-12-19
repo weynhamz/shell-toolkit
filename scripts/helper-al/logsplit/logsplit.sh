@@ -49,9 +49,10 @@ BACKUPOLDDIR=/var/log/.backup/old
 # Split log files by the command
 #
 split(){
+	local output=${2:-1}
 	for i in `cat $1 | cut -d: -f1,2,3 | sed 's/  / /g' | cut -d' ' -f5- | sed 's/\[[[:alnum:]]*\]//g' | sed 's/\[.*\]//g' | sed 's/^ *//g' | sed 's/ *$//g' | sed 's/://g' | sort -u`
 	do
-		grep -E "($HOSTNAME $i:|$HOSTNAME $i\[[[:alnum:]]*\]:)" $1 > $1.$(echo $i | sed 's:/:_:g')
+		grep -E "($HOSTNAME $i:|$HOSTNAME $i\[[[:alnum:]]*\]:)" $1 > ${output}.$(echo $i | sed 's:/:_:g')
 	done
 	sed -i 's/\[[[:alnum:]]*\]//g' *.log.*
 }
@@ -63,7 +64,7 @@ splitr() {
 	next=1
 	while [ -f $1.$next ]
 	do
-		split $1
+		split $1 $1.next
 		next=$(expr $next + 1)
 	done
 
