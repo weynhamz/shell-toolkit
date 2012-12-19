@@ -47,9 +47,6 @@ BACKUPDIR=/var/log/.backup
 PROCESSDIR=/var/log/.process
 BACKUPOLDDIR=/var/log/.backup/old
 
-mkdir -p $BACKUPDIR
-mkdir -p $BACKUPOLDDIR
-
 clean() {
 	mkdir -p $PROCESSDIR/auth
 	mv auth.log.*     $PROCESSDIR/auth
@@ -98,6 +95,8 @@ splitr() {
 }
 
 combine() {
+	mkdir -p $BACKUPOLDDIR
+
 	start=1
 	if [ -f $1.$start ];then
 		cp $1.$start $1.$start.tmp
@@ -122,6 +121,7 @@ combine() {
 }
 
 mksingle() {
+	mkdir -p $BACKUPDIR
 	cd $OLDDIR
 	for j in ${LOGS[@]}
 	do
