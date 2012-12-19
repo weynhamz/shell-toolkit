@@ -97,26 +97,26 @@ splitr() {
 combine() {
 	mkdir -p $BACKUPOLDDIR
 
-	start=1
-	if [ -f $1.$start ];then
-		cp $1.$start $1.$start.tmp
-		mv $1.$start $BACKUPOLDDIR
+	prev=1
+	if [ -f $1.$prev ];then
+		cp $1.$prev $1.$prev.tmp
+		mv $1.$prev $BACKUPOLDDIR
 
-		next=$(expr $start + 1)
+		next=$(expr $prev + 1)
 		while [ -f $1.$next ]
 		do
 			cp $1.$next $1.$next.tmp
 			mv $1.$next $BACKUPOLDDIR
 
-			cat $1.$start.tmp >> $1.$next.tmp
-			rm $1.$start.tmp
+			cat $1.$prev.tmp >> $1.$next.tmp
+			rm $1.$prev.tmp
 
-			start=$next
+			prev=$next
 
 			next=$(expr $next + 1)
 		done
 
-		mv $1.$start.tmp $1-combined
+		mv $1.$prev.tmp $1-combined
 	fi
 }
 
