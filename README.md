@@ -76,3 +76,11 @@ The symtax is pretty much like many other *unit testing frameworks.
 * `TEST_FIELD`
 
     A directory where each test will be run.
+
+Examples
+--------
+
+For an example using this framework, take a look at a script called [dotploy][]
+I wrote to manage and deploy the dot files.
+
+[dotploy]: https://github.com/techlivezheng/dotploy/tests/test-dotploy.sh
