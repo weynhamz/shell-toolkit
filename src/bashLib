@@ -1,0 +1,46 @@
+# vim:et:ft=sh:sw=4:sts=4
+
+[[ $LOADED_BASHLIB -eq 1 ]] && return 0
+
+# Function: die
+#
+#    Exit with a message and status
+#
+die() {
+    echo "$1"
+    exit "${2:-1}"
+}
+
+# Function: _abspath
+#
+#    Get the absolute path for a file
+#
+#    From: http://stackoverflow.com/questions/59895
+#
+_abspath() {
+    local path=${1:-${BASH_SOURCE[0]}}
+    local path_dir=$( dirname "$path" )
+    while [ -h "$path" ]
+    do
+        path=$(readlink "$path")
+        [[ $path != /* ]] && path=$path_dir/$path
+        path_dir=$( cd -P "$( dirname "$path"  )" && pwd )
+    done
+    path_dir=$( cd -P "$( dirname "$path" )" && pwd )
+    echo "$path_dir"
+}
+
+# Function: _dirname
+#
+#    Get the directory path for path string
+#
+_dirname() {
+    if [[ $1 =~ .*\/$ ]]; then
+        echo "$1"
+    else
+        dirname "$1"
+    fi
+}
+
+declare -i LOADED_BASHLIB
+export LOADED_BASHLIB=1
