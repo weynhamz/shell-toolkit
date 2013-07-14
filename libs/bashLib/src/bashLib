@@ -10,6 +10,7 @@ die() {
     echo "$1"
     exit "${2:-1}"
 }
+export -f die
 
 # Function: _abspath
 #
@@ -29,6 +30,7 @@ _abspath() {
     path_dir=$( cd -P "$( dirname "$path" )" && pwd )
     echo "$path_dir"
 }
+export -f _abspath
 
 # Function: _dirname
 #
@@ -41,6 +43,7 @@ _dirname() {
         dirname "$1"
     fi
 }
+export -f _dirname
 
 declare -i LOADED_BASHLIB
 export LOADED_BASHLIB=1
