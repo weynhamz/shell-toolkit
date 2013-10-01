@@ -278,7 +278,7 @@ elif [ ! -n "$test_cmd" ];then
     test_cmd="cat"
 fi
 
-cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_time_cmd}' || cat'\'' '${range}
+cmd='git filter-branch -f --env-filter '\'${test_cmd}' '${fix_time_cmd}' || cat'\'' --tag-name-filter cat '${range}
 
 [ -n "$debug" ] && echo $cmd
 
