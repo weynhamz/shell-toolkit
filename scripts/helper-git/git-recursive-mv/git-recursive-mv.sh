@@ -70,7 +70,13 @@ if [ -z "$sedexp" ]; then
         if [ -d $dst_path ]
         then
             filename=${src_path##*/}
-            dst_path=${dst_path}/$filename
+            if [ $dst_path == '.' ]
+            then
+                dst_path=$filename
+            else
+                dst_path=${dst_path}/$filename
+            fi
+
         elif [ -e $dst_path ]
         then
             echo "$dst_path should not be existed"
