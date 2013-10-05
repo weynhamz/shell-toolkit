@@ -71,10 +71,6 @@ if [ -z "$sedexp" ]; then
                 dst_path=${dst_path}/$filename
             fi
 
-        elif [ -e $dst_path ]
-        then
-            echo "$dst_path should not be existed"
-            exit 1
         fi
 
         src_path=${src_path//\//\\\/}
