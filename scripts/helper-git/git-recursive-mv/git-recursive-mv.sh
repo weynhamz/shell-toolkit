@@ -61,12 +61,6 @@ if [ -z "$sedexp" ]; then
             exit 1
         fi
 
-        if [ ! -e $src_path ]
-        then
-            echo "$src_path does not existed"
-            exit 1
-        fi
-
         if [ -d $dst_path ]
         then
             filename=${src_path##*/}
