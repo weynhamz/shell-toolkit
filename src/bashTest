@@ -115,6 +115,26 @@ _test_done() {
 export -f _test_done
 
 
+# Function: _test_expect_match
+#
+#    Fail if $1 does not match $2
+#
+# Params:
+#
+#    $1: Expression to test
+#    $2: Expression to test
+#
+_test_expect_match() {
+    local expr1=${1:?not set}
+    local expr2=${2:?not set}
+    [[ $expr1 =~ $expr2 ]] || {
+        local msg
+        msg=$msg"No match found in the output"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_match
+
 # Function: _test_expect_missing
 #
 #    Fail if $1 exists
