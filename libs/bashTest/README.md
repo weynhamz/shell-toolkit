@@ -67,6 +67,10 @@ The symtax is pretty much like many other *unit testing frameworks.
 
     Fail if the result of evaluating `$expr` is true
 
+* `_test_expect_expr_match "$expr1" "$expr2"`
+
+    Fail if `$expr1` does not match `$expr2`
+
 ### Env-Variables
 
 * `TEST_COUNT`
