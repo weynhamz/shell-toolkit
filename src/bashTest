@@ -52,7 +52,11 @@ TEST_COUNT=0
 #    Set up fixtures and environment
 #
 _set_up() {
-    export TEST_FIELD=$ABSPATH
+    export TEST_FIELD=$ABSPATH'/test-field/'$TEST_COUNT
+
+    rm -rf "$TEST_FIELD" || die "Failed to set up test facility."
+
+    cd "$TEST_FIELD"
 }
 export -f _set_up
 
