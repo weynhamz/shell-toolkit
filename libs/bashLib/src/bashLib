@@ -2,6 +2,18 @@
 
 [[ $LOADED_BASHLIB -eq 1 ]] && return 0
 
+# Function: _cd
+#
+#    Abort if failed to cd into a directory
+#
+_cd() {
+    if ! cd "$1"; then
+        echo "Failed to change to directory $1" >&2
+        die "Aborting ..."
+    fi
+}
+export -f _cd
+
 # Function: die
 #
 #    Exit with a message and status
@@ -44,6 +56,17 @@ _dirname() {
     fi
 }
 export -f _dirname
+
+# Function: _is_dir_empty
+#
+#    Test if a directory is empty
+#
+_is_dir_empty() (
+    shopt -s dotglob nullglob
+    files=("$1"/*)
+    (( ${#files} == 0 ))
+)
+export -f _is_dir_empty
 
 declare -i LOADED_BASHLIB
 export LOADED_BASHLIB=1
