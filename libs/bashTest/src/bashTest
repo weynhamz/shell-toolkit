@@ -192,7 +192,11 @@ _test_expect_directory() {
     [[ -d $dst ]] || {
         local msg
         msg=$msg"Expect: $(realpath $dst) to be a directory"$'\n'
-        msg=$msg"Current: $(file $dst)"$'\n'
+        [[ -e $dst ]] && {
+            msg=$msg"Current: $(file $dst)"$'\n'
+        } || {
+            msg=$msg"Current: $dst does not exist"$'\n'
+        }
         die "$msg"
     }
 }
