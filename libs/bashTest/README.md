@@ -79,7 +79,7 @@ The symtax is pretty much like many other *unit testing frameworks.
 
 * `TEST_FIELD`
 
-    A directory where each test will be run.
+    A directory where each test will be run, and is unique for each test.
 
 Examples
 --------
