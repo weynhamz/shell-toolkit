@@ -129,8 +129,8 @@ export -f _test_done
 #    $2: Expression to test
 #
 _test_expect_match() {
-    local expr1=${1:?not set}
-    local expr2=${2:?not set}
+    local expr1=$1
+    local expr2=$2
     [[ $expr1 =~ $expr2 ]] || {
         local msg
         msg=$msg"No match found in the output"$'\n'
