@@ -51,7 +51,7 @@ fi
 
 mkdir -p $LOCAL_BIN
 
-for __script in $(find scripts/ -type f -name "*.sh" | grep -v "tests/"); do
+for __script in $(find scripts/ -type f -name "*.sh" | grep -v "tests/" | grep -v ".repo/"); do
     [ -x $__script ] && deploy $__script
 done
 
