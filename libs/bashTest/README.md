@@ -87,4 +87,4 @@ Examples
 For an example using this framework, take a look at a script called [dotploy][]
 I wrote to manage and deploy the dot files.
 
-[dotploy]: https://github.com/techlivezheng/dotploy/tests/test-dotploy.sh
+[dotploy]: https://github.com/techlivezheng/dotploy/blob/master/tests/test-dotploy.sh
