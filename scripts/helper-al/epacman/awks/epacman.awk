@@ -18,7 +18,7 @@
 #     -D  List packages dependency
 #     -R  List packages requirements
 
-@include common.awk
+@include awks/common.awk
 @include /usr/share/awk/getopt.awk
 
 BEGIN {

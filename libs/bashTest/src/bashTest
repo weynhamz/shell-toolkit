@@ -1,0 +1,242 @@
+# vim:et:ft=sh:sw=4:sts=4
+
+[[ $LOADED_BASHTEST -eq 1 ]] && return 0
+
+# Function: _abspath
+#
+#    Get the absolute path for a file
+#
+#    From: http://stackoverflow.com/questions/59895
+#
+_abspath() {
+    local path=${1:-$(caller | cut -d' ' -f2)}
+    local path_dir=$( dirname "$path" )
+    while [ -h "$path" ]
+    do
+        path=$(readlink "$path")
+        [[ $path != /* ]] && path=$path_dir/$path
+        path_dir=$( cd -P "$( dirname "$path"  )" && pwd )
+    done
+    path_dir=$( cd -P "$( dirname "$path" )" && pwd )
+    echo "$path_dir"
+}
+
+ABSPATH=$(_abspath)
+
+if [[ -f $ABSPATH/../../../libs/bashLib/src/bashLib ]]
+then
+    source "$ABSPATH/../../../libs/bashLib/src/bashLib"
+elif [[ -f $ABSPATH/../bundles/bashLib/src/bashLib ]]
+then
+    source "$ABSPATH/../bundles/bashLib/src/bashLib"
+elif [[ -f $ABSPATH/../../bashLib/src/bashLib ]]
+then
+    source "$ABSPATH/../../bashLib/src/bashLib"
+elif [[ -f /usr/share/lib/bashLib/bashLib ]]
+then
+    source "/usr/share/lib/bashLib/bashLib"
+else
+    echo "Can not find bashLib, you need to install it as bundles first."
+    exit 1
+fi
+
+unset ABSPATH
+
+#
+# Counter
+#
+TEST_COUNT=0
+
+# Function: _set_up
+#
+#    Set up fixtures and environment
+#
+_set_up() {
+    export TEST_FIELD=$ABSPATH'/test-field/'$TEST_COUNT
+
+    rm -rf "$TEST_FIELD" || die "Failed to set up test facility."
+
+    cd "$TEST_FIELD"
+}
+export -f _set_up
+
+# Function: _test_run
+#
+#    Tear down fixtures and clean test ground
+#
+_tear_down() {
+    true
+}
+export -f _tear_down
+
+# Function: _test_run
+#
+#    Run a test, output TAP result.
+#
+# Params:
+#
+#    $1: Description for the test
+#    $2: Test code snippet, run in a subshell
+#
+# Output:
+#
+#    TAP format result
+#
+_test_run() {
+    local msg=${1:?not set}
+    local code=${2:?not set}
+    local output
+    local status
+    (( ++TEST_COUNT ))
+    output=$(
+        _set_up || die "set up fixtures failed" 1
+        output=$(
+            set -e
+            exec 2>&1
+            eval "$code"
+        )
+        [ $? -eq 0 ] && status=0 || status=2
+        _tear_down || die "tear down fixtures failed" 1
+        [[ -n $output ]] && echo "$output"
+        return $status
+    )
+    status=$?
+    [[ $status -eq 1 ]] && die "$output"
+    [[ $status -eq 0 ]] && echo -n "ok " || echo -n "not ok "
+    echo -n $TEST_COUNT
+    echo " - $msg"
+    [[ -n $output ]] && echo "$output" | sed 's/^/# /'
+}
+export -f _test_run
+
+# Function: _test_done
+#
+#    Output the test plan
+#
+_test_done() {
+    echo "1..$TEST_COUNT"
+}
+export -f _test_done
+
+
+# Function: _test_expect_match
+#
+#    Fail if $1 does not match $2
+#
+# Params:
+#
+#    $1: Expression to test
+#    $2: Expression to test
+#
+_test_expect_match() {
+    local expr1=$1
+    local expr2=$2
+    [[ $expr1 =~ $expr2 ]] || {
+        local msg
+        msg=$msg"No match found in the output"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_match
+
+# Function: _test_expect_missing
+#
+#    Fail if $1 exists
+#
+# Params:
+#
+#    $1: Path to examine
+#
+_test_expect_missing() {
+    local dst=${1:?not set}
+    [[ ! -e $dst ]] || {
+        local msg
+        msg=$msg"Expect: $(realpath $dst) not exists"$'\n'
+        msg=$msg"Current: $(file $dst)"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_missing
+
+# Function: _test_expect_symlink
+#
+#    Fail if $1 is not symlinked to $2
+#
+# Params:
+#
+#    $1: Source path
+#    $1: Target path
+#
+_test_expect_symlink() {
+    local src=${1:?not set}
+    local dst=${2:?not set}
+    [[ $(readlink -fm $src) == $(realpath $dst) ]] || {
+        local msg
+        msg=$msg"Expect: $src -> $(realpath $dst)"$'\n'
+        msg=$msg"Current: $src -> $(readlink -fm $src)"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_symlink
+
+# Function: _test_expect_directory
+#
+#    Fail if $1 is not a directory
+#
+# Params:
+#
+#    $1: Path to examine
+#
+_test_expect_directory() {
+    local dst=${1:?not set}
+    [[ -d $dst ]] || {
+        local msg
+        msg=$msg"Expect: $(realpath $dst) to be a directory"$'\n'
+        [[ -e $dst ]] && {
+            msg=$msg"Current: $(file $dst)"$'\n'
+        } || {
+            msg=$msg"Current: $dst does not exist"$'\n'
+        }
+        die "$msg"
+    }
+}
+export -f _test_expect_directory
+
+# Function: _test_expect_expr_true
+#
+#    Fail if the result of evaluating $1 is false
+#
+# Params:
+#
+#    $1: Expression to be evaluated
+#
+_test_expect_expr_true() {
+    local expr=${1:?not set}
+    eval "$expr" || {
+        local msg
+        msg=$msg"Expect: Expression $expr success"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_expr_true
+
+# Function: _test_expect_expr_false
+#
+#    Fail if the result of evaluating $1 is true
+#
+# Params:
+#
+#    $1: Expression to be evaluated
+#
+_test_expect_expr_false() {
+    local expr=${1:?not set}
+    eval "$expr" && {
+        local msg
+        msg=$msg"Expect: Expression $expr fail"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_expr_false
+
+declare -i LOADED_BASHTEST
+export LOADED_BASHTEST=1

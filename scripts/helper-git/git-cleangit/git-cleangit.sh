@@ -11,3 +11,5 @@ if [ -n "$refbak" ];then
 fi
 
 git repack -a -d
+
+git fsck

@@ -45,4 +45,4 @@ target_commit=$(git rev-parse $1)
 
 [ -n "$branch" ] && range="$branch"
 
-git filter-branch -f --parent-filter 'test $GIT_COMMIT = '$target_commit' && echo "-p '$parent_commit'" || cat' $range
+git filter-branch -f --prune-empty --parent-filter 'test $GIT_COMMIT = '$target_commit' && echo "-p '$parent_commit'" || cat' $range

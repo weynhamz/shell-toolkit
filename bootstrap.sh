@@ -32,7 +32,7 @@ deploy() {
     dest=$LOCAL_BIN'/'$file
     if [ -h $dest ]; then
         cdst=$(realpath $dest 2>/dev/null)
-        if [ -n "$cdst" ]; then
+        if [ -s "$cdst" ]; then
             [ "$cdst" != "$srcp" ] && echo "$dest is link to $cdst, not $srcp"
         else
             echo "$dest is broken, link it to $srcp"
@@ -51,7 +51,7 @@ fi
 
 mkdir -p $LOCAL_BIN
 
-for __script in $(find scripts/ -type f -name "*.sh" | grep -v "tests/"); do
+for __script in $(find scripts/ -type f -name "*.sh" | grep -v "tests/" | grep -v ".repo/"); do
     [ -x $__script ] && deploy $__script
 done
 

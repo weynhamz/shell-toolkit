@@ -61,20 +61,16 @@ if [ -z "$sedexp" ]; then
             exit 1
         fi
 
-        if [ ! -e $src_path ]
-        then
-            echo "$src_path does not existed"
-            exit 1
-        fi
-
         if [ -d $dst_path ]
         then
             filename=${src_path##*/}
-            dst_path=${dst_path}/$filename
-        elif [ -e $dst_path ]
-        then
-            echo "$dst_path should not be existed"
-            exit 1
+            if [ $dst_path == '.' ]
+            then
+                dst_path=$filename
+            else
+                dst_path=${dst_path}/$filename
+            fi
+
         fi
 
         src_path=${src_path//\//\\\/}
@@ -88,4 +84,6 @@ fi
 
 [ -n "$branch" ] && range="$branch"
 
-git filter-branch -f --index-filter 'git ls-files -s | sed "'$sedexp'" | GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info && mv $GIT_INDEX_FILE.new $GIT_INDEX_FILE' $range
+cmd='git filter-branch -f --index-filter '\''git ls-files -s | sed "'$sedexp'" | GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info && mv $GIT_INDEX_FILE.new $GIT_INDEX_FILE'\'' '$range
+
+eval "$cmd"
