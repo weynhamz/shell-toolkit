@@ -1,6 +1,6 @@
 # vim:et:ft=sh:sw=4:sts=4
 
-[[ $LOADED_BASHLIB -eq 1 ]] && return 0
+[[ $0 =~ (bash|-bash) ]] && [[ $LOADED_BASHLIB -eq 1 ]] && return 0
 
 # Function: _cd
 #
