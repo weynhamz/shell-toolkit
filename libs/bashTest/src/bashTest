@@ -139,6 +139,28 @@ _test_expect_match() {
 }
 export -f _test_expect_match
 
+# Function: _test_expect_unmatch
+#
+#    Fail if $1 does match $2
+#
+# Params:
+#
+#    $1: Expression to test
+#    $2: Expression to test
+#
+_test_expect_unmatch() {
+    local expr1=$1
+    local expr2=$2
+    [[ $expr1 =~ $expr2 ]] && {
+        local msg
+        msg=$msg"Match found in the output"$'\n'
+        die "$msg"
+    } || {
+        return 0
+    }
+}
+export -f _test_expect_unmatch
+
 # Function: _test_expect_missing
 #
 #    Fail if $1 exists
