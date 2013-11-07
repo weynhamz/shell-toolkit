@@ -5,7 +5,7 @@
 
 help=$(cat << 'EOF'
 
-Move file path in history.
+Move file to another location through the whole history.
 
 Usage:
 
