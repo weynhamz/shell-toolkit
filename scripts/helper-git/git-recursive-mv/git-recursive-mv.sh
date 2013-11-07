@@ -47,7 +47,6 @@ fi
 if [ -z "$sedexp" ]; then
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "source or dest file must be set."
-        echo "Sed expresion not given"
         echo "$help"
         exit 1
     else
