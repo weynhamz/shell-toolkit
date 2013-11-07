@@ -2,6 +2,10 @@
 
 [[ $0 =~ (bash|-bash) ]] && [[ $LOADED_BASHLIB -eq 1 ]] && return 0
 
+export LOADED_BASHLIB=1
+
+# @@BASHLIB BEGIN@@
+
 # Function: _cd
 #
 #    Abort if failed to cd into a directory
@@ -68,5 +72,4 @@ _is_dir_empty() (
 )
 export -f _is_dir_empty
 
-declare -i LOADED_BASHLIB
-export LOADED_BASHLIB=1
+# @@BASHLIB END@@
