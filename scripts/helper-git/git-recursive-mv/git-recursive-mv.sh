@@ -53,13 +53,6 @@ if [ -z "$sedexp" ]; then
         src_path=${1%/}
         dst_path=${2%/}
 
-        if [ -z "$src_path" ] || [ -z "$dst_path" ]
-        then
-            echo "source or dest file must be set."
-            echo "$help"
-            exit 1
-        fi
-
         if [ -d $dst_path ]
         then
             filename=${src_path##*/}
