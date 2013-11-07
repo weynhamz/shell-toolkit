@@ -4,6 +4,8 @@
 
 export LOADED_BASHLIB=1
 
+# @@BASHLIB BEGIN@@
+
 # Function: _cd
 #
 #    Abort if failed to cd into a directory
@@ -69,3 +71,5 @@ _is_dir_empty() (
     (( ${#files} == 0 ))
 )
 export -f _is_dir_empty
+
+# @@BASHLIB END@@
