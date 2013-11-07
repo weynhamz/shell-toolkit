@@ -192,10 +192,10 @@ export -f _test_expect_missing
 _test_expect_symlink() {
     local src=${1:?not set}
     local dst=${2:?not set}
-    [[ $(readlink -fm $src) == $dst ]] || {
+    [[ $(readlink $src) == $dst ]] || {
         local msg
         msg=$msg"Expect: $src -> $dst"$'\n'
-        msg=$msg"Current: $src -> $(readlink -fm $src)"$'\n'
+        msg=$msg"Current: $src -> $(readlink $src)"$'\n'
         die "$msg"
     }
 }
