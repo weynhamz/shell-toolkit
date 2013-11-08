@@ -50,11 +50,12 @@ if [ -z "$sedexp" ]; then
         echo "$help"
         exit 1
     else
-        src_path=${1%/}
-        dst_path=${2%/}
+        src_path=$1
+        dst_path=$2
 
-        if [ -d $dst_path ]
+        if [[ $dst_path =~ ^.*/$ ]]
         then
+            dst_path=${dst_path%%/}
             filename=${src_path##*/}
             if [ $dst_path == '.' ]
             then
