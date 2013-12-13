@@ -87,24 +87,52 @@ _test_run() {
     local code=${2:?not set}
     local output
     local status
+
     (( ++TEST_COUNT ))
+
+    # Collect the test case output
     output=$(
+        # Set up test facility
+        # Error return code: 1
         _set_up || die "set up fixtures failed" 1
+
+        # Collect test case output, so that the return code of
+        # the test case could be unified.
         output=$(
-            set -e
+            # Print test case stderr to stdout
             exec 2>&1
+
+            # Stop on any error
+            set -e
+
+            # Test case stdout is at &1
+            # Test case stderr is at &2
             eval "$code"
         )
+
+        # Test case success return code: 0
+        # Test case failure return code: 2
         [ $? -eq 0 ] && status=0 || status=2
+
+        # Tear down test facility
+        # Error return code: 1
         _tear_down || die "tear down fixtures failed" 1
+
+        # Print the output to be collected again
         [[ -n $output ]] && echo "$output"
+
         return $status
     )
+
+    # Store the return code
     status=$?
+
+    # Die directly on test suite error
     [[ $status -eq 1 ]] && die "$output"
-    [[ $status -eq 0 ]] && echo -n "ok " || echo -n "not ok "
-    echo -n $TEST_COUNT
-    echo " - $msg"
+
+    # Print result for test harness
+    [[ $status -eq 0 ]] && echo -n "ok" || echo -n "not ok"
+    echo " $TEST_COUNT - $msg"
     [[ -n $output ]] && echo "$output" | sed 's/^/# /'
 }
 export -f _test_run
