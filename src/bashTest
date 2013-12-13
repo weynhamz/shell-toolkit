@@ -93,8 +93,8 @@ _test_run() {
     # Collect the test case output
     output=$(
         # Set up test facility
-        # Error return code: 1
-        _set_up || die "set up fixtures failed" 1
+        # Error return code: 2
+        _set_up || die "set up fixtures failed" 2
 
         # Collect test case output, so that the return code of
         # the test case could be unified.
@@ -111,12 +111,12 @@ _test_run() {
         )
 
         # Test case success return code: 0
-        # Test case failure return code: 2
-        [ $? -eq 0 ] && status=0 || status=2
+        # Test case failure return code: 1
+        [ $? -eq 0 ] && status=0 || status=1
 
         # Tear down test facility
-        # Error return code: 1
-        _tear_down || die "tear down fixtures failed" 1
+        # Error return code: 2
+        _tear_down || die "tear down fixtures failed" 2
 
         # Print the output to be collected again
         [[ -n $output ]] && echo "$output"
@@ -128,7 +128,7 @@ _test_run() {
     status=$?
 
     # Die directly on test suite error
-    [[ $status -eq 1 ]] && die "$output"
+    [[ $status -eq 2 ]] && die "$output"
 
     # Print result for test harness
     [[ $status -eq 0 ]] && echo -n "ok" || echo -n "not ok"
