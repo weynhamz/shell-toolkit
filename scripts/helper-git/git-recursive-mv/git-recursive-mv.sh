@@ -53,7 +53,7 @@ if [ -z "$sedexp" ]; then
         src_path=$1
         dst_path=$2
 
-        if [[ $dst_path =~ ^.*/$ ]]
+        if [[ $dst_path == . ]] || [[ $dst_path =~ ^.*/$ ]]
         then
             dst_path=${dst_path%%/}
             filename=${src_path##*/}
