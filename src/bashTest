@@ -189,8 +189,11 @@ _test_expect_match() {
     local expr2=$2
     [[ $expr1 =~ $expr2 ]] || {
         local msg
-        msg=$msg"No match found in the output"$'\n'
-        die "$msg"
+        msg=$msg"No match found"$'\n'
+        msg=$msg$'\t'"Expression 1:"$'\n'
+        msg=$msg$(echo "$expr1" | sed 's/^/\t\t/')$'\n'
+        msg=$msg$'\t'"Expression 2:"$'\n'
+        msg=$msg$(echo "$expr2" | sed 's/^/\t\t/')$'\n'
         _test_die "$msg"
     }
 }
@@ -210,8 +213,11 @@ _test_expect_unmatch() {
     local expr2=$2
     [[ $expr1 =~ $expr2 ]] && {
         local msg
-        msg=$msg"Match found in the output"$'\n'
-        die "$msg"
+        msg=$msg"Match found"$'\n'
+        msg=$msg"Expression 1:"$'\n'
+        msg=$msg$(echo "$expr1" | sed 's/^/\t/')$'\n'
+        msg=$msg"Expression 2:"$'\n'
+        msg=$msg$(echo "$expr2" | sed 's/^/\t/')$'\n'
         _test_die "$msg"
     } || {
         return 0
