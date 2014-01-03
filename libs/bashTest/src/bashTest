@@ -339,6 +339,8 @@ _test_expect_expr_false() {
         local msg
         msg=$msg"Expect: Expression $expr fail"$'\n'
         _test_die "$msg"
+    } || {
+        exit 0
     }
 }
 export -f _test_expect_expr_false
