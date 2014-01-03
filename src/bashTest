@@ -11,7 +11,7 @@
 _abspath() {
     local path=${1:-$(caller | cut -d' ' -f2)}
     local path_dir=$( dirname "$path" )
-    while [ -h "$path" ]
+    while [[ -h "$path" ]]
     do
         path=$(readlink "$path")
         [[ $path != /* ]] && path=$path_dir/$path
@@ -124,7 +124,7 @@ _test_run() {
 
             # Test case success return code: 0
             # Test case failure return code: 1
-            [ $? -eq 0 ] && status=0 || status=1
+            [[ $? -eq 0 ]] && status=0 || status=1
 
             # Tear down test facility
             # Error return code: 2
