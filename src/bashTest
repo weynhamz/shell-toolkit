@@ -225,6 +225,25 @@ _test_expect_unmatch() {
 }
 export -f _test_expect_unmatch
 
+# Function: _test_expect_exists
+#
+#    Fail if $1 missing
+#
+# Params:
+#
+#    $1: Path to examine
+#
+_test_expect_exists() {
+    local dst=${1:?not set}
+    [[ -e $dst ]] || {
+        local msg
+        msg=$msg"Expect: $(realpath $dst) exists"$'\n'
+        msg=$msg"Current: $(file $dst)"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_exists
+
 # Function: _test_expect_missing
 #
 #    Fail if $1 exists
