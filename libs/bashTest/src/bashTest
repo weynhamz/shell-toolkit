@@ -11,7 +11,7 @@
 _abspath() {
     local path=${1:-$(caller | cut -d' ' -f2)}
     local path_dir=$( dirname "$path" )
-    while [ -h "$path" ]
+    while [[ -h "$path" ]]
     do
         path=$(readlink "$path")
         [[ $path != /* ]] && path=$path_dir/$path
@@ -87,27 +87,83 @@ _test_run() {
     local code=${2:?not set}
     local output
     local status
+
     (( ++TEST_COUNT ))
+
+    # Collect the test case and the test assertion output
     output=$(
-        _set_up || die "set up fixtures failed" 1
-        output=$(
-            set -e
-            exec 2>&1
-            eval "$code"
+        # Redirect test case output to stdout
+        exec 4>&1
+
+        # Collect the test assertion output, so that it
+        # could be printed after the test case output.
+        test_assertion_output=$(
+            # Redirect test assertion output to stdout
+            exec 3>&1
+
+            # Set up test facility
+            # Error return code: 2
+            _set_up || die "set up fixtures failed" 2
+
+            # Collect test case output, so that the return
+            # code of the test case could be unified.
+            test_case_output=$(
+                # Redirect test case stderr to stdout, the test
+                # assertion output is still on &3, we will deal
+                # with it later.
+                exec 2>&1
+
+                # Stop on any error
+                set -e
+
+                # Test case stdout is at &1
+                # Test case stderr is at &2
+                # Test assertion output is at &3
+                eval "$code"
+            )
+
+            # Test case success return code: 0
+            # Test case failure return code: 1
+            [[ $? -eq 0 ]] && status=0 || status=1
+
+            # Tear down test facility
+            # Error return code: 2
+            _tear_down || die "tear down fixtures failed" 2
+
+            # Redirect test case output to &4, so that the stdout
+            # could be used to collect the test assertion output.
+            [[ -n $test_case_output ]] && echo "$test_case_output" >&4
+
+            return $status
         )
-        [ $? -eq 0 ] && status=0 || status=2
-        _tear_down || die "tear down fixtures failed" 1
-        [[ -n $output ]] && echo "$output"
+
+        # Store the return code
+        status=$?
+
+        # Print test assertion output after the test case output
+        [[ -n $test_assertion_output ]] && echo "$test_assertion_output"
+
         return $status
     )
+
+    # Store the return code
     status=$?
-    [[ $status -eq 1 ]] && die "$output"
-    [[ $status -eq 0 ]] && echo -n "ok " || echo -n "not ok "
-    echo -n $TEST_COUNT
-    echo " - $msg"
+
+    # Die directly on test suite error
+    [[ $status -eq 2 ]] && die "$output"
+
+    # Print result for test harness
+    [[ $status -eq 0 ]] && echo -n "ok" || echo -n "not ok"
+    echo " $TEST_COUNT - $msg"
     [[ -n $output ]] && echo "$output" | sed 's/^/# /'
 }
 export -f _test_run
+
+_test_die() {
+    echo "$1" >&3
+    exit "${2:-1}"
+}
+export -f _test_die
 
 # Function: _test_done
 #
@@ -133,8 +189,12 @@ _test_expect_match() {
     local expr2=$2
     [[ $expr1 =~ $expr2 ]] || {
         local msg
-        msg=$msg"No match found in the output"$'\n'
-        die "$msg"
+        msg=$msg"No match found"$'\n'
+        msg=$msg$'\t'"Expression 1:"$'\n'
+        msg=$msg$(echo "$expr1" | sed 's/^/\t\t/')$'\n'
+        msg=$msg$'\t'"Expression 2:"$'\n'
+        msg=$msg$(echo "$expr2" | sed 's/^/\t\t/')$'\n'
+        _test_die "$msg"
     }
 }
 export -f _test_expect_match
@@ -153,13 +213,36 @@ _test_expect_unmatch() {
     local expr2=$2
     [[ $expr1 =~ $expr2 ]] && {
         local msg
-        msg=$msg"Match found in the output"$'\n'
-        die "$msg"
+        msg=$msg"Match found"$'\n'
+        msg=$msg"Expression 1:"$'\n'
+        msg=$msg$(echo "$expr1" | sed 's/^/\t/')$'\n'
+        msg=$msg"Expression 2:"$'\n'
+        msg=$msg$(echo "$expr2" | sed 's/^/\t/')$'\n'
+        _test_die "$msg"
     } || {
         return 0
     }
 }
 export -f _test_expect_unmatch
+
+# Function: _test_expect_exists
+#
+#    Fail if $1 missing
+#
+# Params:
+#
+#    $1: Path to examine
+#
+_test_expect_exists() {
+    local dst=${1:?not set}
+    [[ -e $dst ]] || {
+        local msg
+        msg=$msg"Expect: $(realpath $dst) exists"$'\n'
+        msg=$msg"Current: $(file $dst)"$'\n'
+        die "$msg"
+    }
+}
+export -f _test_expect_exists
 
 # Function: _test_expect_missing
 #
@@ -175,7 +258,7 @@ _test_expect_missing() {
         local msg
         msg=$msg"Expect: $(realpath $dst) not exists"$'\n'
         msg=$msg"Current: $(file $dst)"$'\n'
-        die "$msg"
+        _test_die "$msg"
     }
 }
 export -f _test_expect_missing
@@ -196,7 +279,7 @@ _test_expect_symlink() {
         local msg
         msg=$msg"Expect: $src -> $dst"$'\n'
         msg=$msg"Current: $src -> $(readlink $src)"$'\n'
-        die "$msg"
+        _test_die "$msg"
     }
 }
 export -f _test_expect_symlink
@@ -219,7 +302,7 @@ _test_expect_directory() {
         } || {
             msg=$msg"Current: $dst does not exist"$'\n'
         }
-        die "$msg"
+        _test_die "$msg"
     }
 }
 export -f _test_expect_directory
@@ -237,7 +320,7 @@ _test_expect_expr_true() {
     eval "$expr" || {
         local msg
         msg=$msg"Expect: Expression $expr success"$'\n'
-        die "$msg"
+        _test_die "$msg"
     }
 }
 export -f _test_expect_expr_true
@@ -255,7 +338,9 @@ _test_expect_expr_false() {
     eval "$expr" && {
         local msg
         msg=$msg"Expect: Expression $expr fail"$'\n'
-        die "$msg"
+        _test_die "$msg"
+    } || {
+        exit 0
     }
 }
 export -f _test_expect_expr_false

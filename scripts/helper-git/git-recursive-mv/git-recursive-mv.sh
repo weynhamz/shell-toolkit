@@ -5,7 +5,7 @@
 
 help=$(cat << 'EOF'
 
-Move file path in history.
+Move file to another location through the whole history.
 
 Usage:
 
@@ -47,22 +47,15 @@ fi
 if [ -z "$sedexp" ]; then
     if [ -z "$1" ] || [ -z "$2" ]; then
         echo "source or dest file must be set."
-        echo "Sed expresion not given"
         echo "$help"
         exit 1
     else
-        src_path=${1%/}
-        dst_path=${2%/}
+        src_path=$1
+        dst_path=$2
 
-        if [ -z "$src_path" ] || [ -z "$dst_path" ]
+        if [[ $dst_path == . ]] || [[ $dst_path =~ ^.*/$ ]]
         then
-            echo "source or dest file must be set."
-            echo "$help"
-            exit 1
-        fi
-
-        if [ -d $dst_path ]
-        then
+            dst_path=${dst_path%%/}
             filename=${src_path##*/}
             if [ $dst_path == '.' ]
             then

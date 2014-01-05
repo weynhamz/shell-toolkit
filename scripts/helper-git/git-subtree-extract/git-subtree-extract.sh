@@ -8,7 +8,7 @@ git clone --no-hardlinks $1 $2
 
 cd $2
 
-for branch in `git branch -a | grep remotes | grep -v HEAD | grep -v master`; do
+for branch in `git branch -a | sed 's/^\s*//' | grep remotes | grep -v HEAD | grep -v master`; do
     git branch --track ${branch#remotes/origin/} $branch
 done
 
