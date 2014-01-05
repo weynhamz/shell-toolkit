@@ -47,6 +47,10 @@ The symtax is pretty much like many other *unit testing frameworks.
 
 ### Assertions
 
+* `_test_expect_exists "$path"`
+
+    Fail if `$path` missing
+
 * `_test_expect_missing "$path"`
 
     Fail if `$path` exists
@@ -70,6 +74,10 @@ The symtax is pretty much like many other *unit testing frameworks.
 * `_test_expect_expr_match "$expr1" "$expr2"`
 
     Fail if `$expr1` does not match `$expr2`
+
+* `_test_expect_expr_unmatch "$expr1" "$expr2"`
+
+    Fail if `$expr1` does match `$expr2`
 
 ### Env-Variables
 
