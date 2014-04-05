@@ -10,6 +10,4 @@ if [ -n "$refbak" ];then
     echo -n $refbak | xargs -n 1 git update-ref -d
 fi
 
-git repack -a -d
-
 git fsck
