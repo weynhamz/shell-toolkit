@@ -9,25 +9,27 @@ A helper script for easily editing and commiting changes into git.
 
     git-editfile.sh [-f] [-b] [-d] [-m] [-g] [-r] [-c <commit message>] [-s] <file>
 
-    <file> arg could be any were in the options list. For the convenient of
-    changing the flags, the following form is more usefull.
+    Be aware that `<file>` arg could be placed anywhere in the arguments list.
+
+    For the convenience of changing the flags, the following form is much more
+    usefull.
 
     git-editfile.sh <file> [-f] [-b] [-d] [-m] [-g] [-r] [-c <commit message>] [-s]
 
 Options:
 
+    -h  Show the help message
     -f  Force the operation if not in a git repo
-        Force backup if file has not been changed
         Force revert if file has been changed
+        Force backup if file has not been changed
     -b  Backup <file> to <file>.bak
     -d  Edit <file> and <file>.bak in vim diff mode
     -m  Backup first, then diff edit the file
-    -g  Revert the changes introduced by <file> in the prefious
+    -g  Revert the changes introduced by <file> in the previous
         commit, the changed file were saved to <file>.bak
     -r  Revert <file>.bak to <file>
     -c  Commit <file> with <commit message>
     -s  Commit <file> with message 'squash' for later rebasing.
-    -h  Show the help message
 
 EOF
 )
