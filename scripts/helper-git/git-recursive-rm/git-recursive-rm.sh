@@ -8,12 +8,13 @@ Remove a file through the whole history.
 
 Usage:
 
-    git-recursive-rm.sh ([-a]|[-b <branch>]) <file>
+    git-recursive-rm.sh ([-a]|[-b <branch>]) [-d] <file>
 
 Options:
 
     -a Filter on all branches
     -b Branch to be filtered on
+    -d Output the command
 EOF
 )
 
@@ -23,6 +24,8 @@ do
     'a')    all=TRUE
             ;;
     'b')    branch=$OPTARG
+            ;;
+    'd')    debug=TRUE
             ;;
     'h')    echo "$help"
             exit 0
@@ -48,4 +51,6 @@ fi
 
 cmd='git filter-branch -f --prune-empty --index-filter '\''git rm -r --cached --ignore-unmatch "'$file'"'\'' '$range
 
-eval "$cmd"
+[ -n "$debug" ] && echo $cmd || {
+    eval "$cmd"
+}
