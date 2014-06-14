@@ -90,6 +90,12 @@ _test_run() {
 
     (( ++TEST_COUNT ))
 
+    [[ -n $TEST_CASE ]] && [[ $TEST_CASE -ne $TEST_COUNT ]] && {
+        echo -n "ok"
+        echo " $TEST_COUNT # skip - $msg"
+        return 0
+    }
+
     # Collect the test case and the test assertion output
     output=$(
         # Redirect test case output to stdout
