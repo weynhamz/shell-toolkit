@@ -9,12 +9,13 @@ Move file to another location through the whole history.
 
 Usage:
 
-    git-recursive-mv.sh ([-a]|[-b <branch>]) -e <sed expression> <source path> <dest path>
+    git-recursive-mv.sh ([-a]|[-b <branch>]) [-d] -e <sed expression> <source path> <dest path>
 
 Options:
 
     -a Filter on all branches
     -b Branch to be filtered on
+    -d Output the command
     -e Sed expression
 EOF
 )
@@ -27,6 +28,8 @@ do
     'b')    branch=$OPTARG
             ;;
     'e')    sedexp=$OPTARG
+            ;;
+    'd')    debug=TRUE
             ;;
     'h')    echo "$help"
             exit 0
@@ -79,4 +82,6 @@ fi
 
 cmd='git filter-branch -f --prune-empty --index-filter '\''git ls-files -s | sed "'$sedexp'" | GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info && mv $GIT_INDEX_FILE.new $GIT_INDEX_FILE'\'' '$range
 
-eval "$cmd"
+[ -n "$debug" ] && echo $cmd || {
+    eval "$cmd"
+}
