@@ -1,0 +1,39 @@
+#!/bin/bash
+pacman_qkk() {
+    LC_ALL=C
+    _name=$1
+    _version=$(pacman -Qi $_name | grep '^Version' | sed 's/ *//g' | cut -d: -f2-)
+    str=$_name-$_version
+    mtree=/var/lib/pacman/local/$str/mtree
+    [[ ! -f $mtree ]] && {
+	echo $str
+    }
+    IFS=$'\n'
+    for f in `zcat $mtree | grep -v '^\./\.' | grep '^\./' | sed -e 's:^\./:path=/:'`
+    do
+        (
+            unset IFS
+            eval "$(printf "$f" | sed -e 's:(:\\(:g' -e 's:):\\):g' -e 's/ \([^ ]*\)=/\t\1=/g' -e 's/ /\\ /g' -e 's/\t\([^_]\+\)=/ \1=/g')"
+            #[[ ! -e $path ]] && echo $_name:$_version:$type:$path
+            [[ ! -e $path ]] && continue
+            [[ ! -z $type ]] && continue
+            [[ ! -f $path ]] && continue
+            checksum=$(sha256sum "$path" | cut -d' ' -f1)
+            sha256digest=$(echo $sha256digest)
+            [[ $checksum != $sha256digest ]] && {
+                echo $path
+		cp $path $path.pacsave
+                #echo $'\tExpected:\t'$sha256digest
+                #echo $'\tCurrently:\t'$checksum
+            }
+        )
+    done
+    return 0
+}
+
+for i in `pacman -Rcs -p --print-format %n $@`
+do 
+    pacman_qkk "$i"
+done
+
+pacman -Rcs $@
