@@ -18,7 +18,7 @@ Options:
 EOF
 )
 
-while getopts :ab:e:h opt
+while getopts :ab:dh opt
 do
     case $opt in
     'a')    all=TRUE
